@@ -1,0 +1,73 @@
+:root {
+  --font-ui: Archivo, ui-sans-serif, system-ui, sans-serif;
+  --brand: #0e684e;
+  --canvas: #f6f8f7;
+}
+
+html,
+body,
+#root {
+  background: var(--canvas);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* O react-native-web define font-family por classe atômica em cada Text;
+   aqui a família da marca vence em toda a árvore do app. */
+html,
+body,
+#root,
+#root * {
+  font-family: var(--font-ui) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+input,
+textarea {
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8c9892;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+[tabindex='0']:focus-visible,
+[role='button']:focus-visible,
+[role='link']:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: #cfe6da;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

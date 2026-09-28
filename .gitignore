@@ -1,0 +1,58 @@
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+Thumbs.db
+*.pem
+
+# Editors
+.idea/
+.vscode/
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+example
+
+# generated native folders
+/ios
+/android
+
+# Backend
+/conformia-api/target/
+/conformia-api/storage/
+/conformia-api/storage-demo/
+/conformia-api/data/
+/conformia-api/api-run.log
+/conformia-api/api-run.err.log
+
+# Referências visuais locais (não versionar)
+/inspiracoes - nao manter/

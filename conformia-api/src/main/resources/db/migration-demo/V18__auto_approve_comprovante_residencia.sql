@@ -1,0 +1,5 @@
+UPDATE documento
+SET status = 'APROVADO'
+WHERE tipo = 'COMPROVANTE_RESIDENCIA'
+  AND status = 'PENDENTE';
+
