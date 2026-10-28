@@ -7,7 +7,6 @@ import {
   Pressable,
   SafeAreaView,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   useWindowDimensions,
@@ -19,7 +18,9 @@ import { Eye, EyeOff } from 'lucide-react-native';
 
 import { login } from '@/api/auth';
 import { ApiError } from '@/api/types';
-import { color, radius, type } from '@/constants/theme';
+import { AlternarTema } from '@/components/AlternarTema';
+import { Brilho } from '@/components/Brilho';
+import { color, estilos, radius, type } from '@/constants/theme';
 
 export default function LoginScreen() {
   const { width } = useWindowDimensions();
@@ -63,9 +64,14 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={[styles.flex, amplo && styles.linha]}>
+          {!amplo ? <AlternarTema style={styles.temaCompacto} /> : null}
           {amplo ? (
             <View style={styles.painelMarca}>
-              <Marca />
+              <Brilho variante="escuro" />
+              <View style={styles.painelTopo}>
+                <AlternarTema sobreEscuro />
+                <Marca />
+              </View>
               <Text style={styles.painelTexto}>
                 Documentos, holerites, jornada e avaliações da sua equipe em um só lugar.
               </Text>
@@ -187,7 +193,7 @@ function Marca({ compacta = false }: { compacta?: boolean }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   safe: {
     flex: 1,
     backgroundColor: color.surface,
@@ -198,10 +204,22 @@ const styles = StyleSheet.create({
   linha: {
     flexDirection: 'row',
   },
+  painelTopo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  temaCompacto: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    zIndex: 2,
+  },
   painelMarca: {
     width: '42%',
     maxWidth: 560,
-    backgroundColor: color.brandDeep,
+    backgroundColor: color.noite,
+    overflow: 'hidden',
     paddingHorizontal: 56,
     paddingVertical: 48,
     justifyContent: 'space-between',
@@ -347,4 +365,4 @@ const styles = StyleSheet.create({
     color: color.muted,
     ...type.small,
   },
-});
+}));

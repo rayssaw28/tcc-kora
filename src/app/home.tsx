@@ -1,6 +1,6 @@
 import { isDesktopWeb } from '@/constants/responsive';
 import { rotuloBeneficio, rotuloDocumento } from '@/constants/rotulos';
-import { color, radius, type } from '@/constants/theme';
+import { color, elevacao, estilos, radius, tomDoNome, tons, type, type NomeTom } from '@/constants/theme';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
@@ -73,6 +73,8 @@ import {
   StatusAdmissao,
   TermoLgpdResponse,
 } from '@/api/types';
+import { AlternarTema } from '@/components/AlternarTema';
+import { Brilho } from '@/components/Brilho';
 import { PessoalSection } from '@/components/PessoalSection';
 import {
   DadosBancariosSection,
@@ -152,13 +154,19 @@ const labelsAdmissao: Record<StatusAdmissao, string> = {
   DESLIGADO: 'Desligado',
 };
 
+// Guarda a aba aberta para que a troca de tema (que remonta as telas) não volte ao Início.
+let abaMemorizada: Aba = 'inicio';
+
 export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const desktopWeb = isDesktopWeb(width);
   // Menu no topo a partir de 1024px; abaixo disso, barra inferior de app.
   const barraTopo = Platform.OS === 'web' && width >= 1024;
   const colunasInicio = barraTopo ? (width >= 1280 ? 3 : 2) : 1;
-  const [aba, setAba] = useState<Aba>('inicio');
+  const [aba, setAba] = useState<Aba>(() => abaMemorizada);
+  useEffect(() => {
+    abaMemorizada = aba;
+  }, [aba]);
   const [maisAberto, setMaisAberto] = useState(false);
   const [contaAberta, setContaAberta] = useState(false);
   const [me, setMe] = useState<FuncionarioResponse | null>(null);
@@ -636,6 +644,7 @@ export default function HomeScreen() {
   }
 
   async function sair() {
+    abaMemorizada = 'inicio';
     await logout();
     router.replace('/');
   }
@@ -768,6 +777,7 @@ export default function HomeScreen() {
     <>
       {aba !== 'inicio' || colunasInicio === 1 ? (
         <View style={styles.paginaCabecalho}>
+          <IconeModulo aba={aba} grande={desktopWeb} />
           <View style={styles.paginaTituloBloco}>
             <Text style={[styles.paginaTitulo, desktopWeb && styles.paginaTituloWeb]}>
               {cabecalho.titulo}
@@ -1118,6 +1128,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe}>
       {barraTopo ? (
         <View style={styles.shellColuna}>
+          <Brilho variante="pagina" style={styles.luzPagina} />
           <BarraTopo
             itens={navegacao}
             ativa={aba}
@@ -1137,6 +1148,7 @@ export default function HomeScreen() {
         </View>
       ) : (
         <View style={styles.shellColuna}>
+          <Brilho variante="pagina" style={styles.luzPagina} />
           <BarraSuperior me={me} titulo={cabecalho.curto} onConta={() => setContaAberta(true)} />
           {rolagem}
           <NavegacaoInferior
@@ -1534,6 +1546,49 @@ const ICONES_MENU: Record<Aba, typeof Home> = {
   org: Network,
 };
 
+/** Cada módulo tem um tom próprio, repetido no cabeçalho da página e nas notificações. */
+const TOM_MODULO: Record<Aba, NomeTom> = {
+  inicio: 'verde',
+  pessoal: 'indigo',
+  arquivos: 'azul',
+  rh: 'violeta',
+  holerites: 'laranja',
+  jornada: 'teal',
+  colaboradores: 'rosa',
+  administracao: 'ardosia',
+  org: 'ciano',
+};
+
+function IconeModulo({ aba, grande = false, pequeno = false }: { aba: Aba; grande?: boolean; pequeno?: boolean }) {
+  const Icone = ICONES_MENU[aba];
+  const tom = tons[TOM_MODULO[aba]];
+  const tamanho = grande ? 52 : pequeno ? 36 : 44;
+  // Ladrilho cheio com ícone branco: destaca tanto no fundo claro quanto no escuro,
+  // e a sombra na cor do próprio módulo dá a sensação de luz.
+  return (
+    <View
+      style={[
+        styles.moduloIcone,
+        { width: tamanho, height: tamanho, backgroundColor: tom.solido, shadowColor: tom.solido },
+      ]}
+      importantForAccessibility="no-hide-descendants"
+    >
+      <Icone color="#FFFFFF" size={grande ? 24 : pequeno ? 18 : 21} strokeWidth={2.1} />
+    </View>
+  );
+}
+
+function Avatar({ nome, tamanho = 36 }: { nome?: string | null; tamanho?: number }) {
+  const tom = tomDoNome(nome);
+  return (
+    <View style={[styles.avatar, { width: tamanho, height: tamanho, borderRadius: tamanho / 2, backgroundColor: tom.suave }]}>
+      <Text style={[styles.avatarTexto, { color: tom.texto }, tamanho >= 64 && type.heading]}>
+        {iniciais(nome)}
+      </Text>
+    </View>
+  );
+}
+
 const ITENS_BARRA_INFERIOR = 4;
 
 type ItemNavegacao = (typeof tabs)[number];
@@ -1562,6 +1617,7 @@ function BarraTopo({
     <View style={styles.topo}>
       <View style={styles.topoInterno}>
         <View style={styles.topoMarca}>
+          <AlternarTema />
           <View style={styles.barraSelo}>
             <Image
               source={require('../../assets/images/logo-conformia.png')}
@@ -1573,6 +1629,7 @@ function BarraTopo({
         </View>
 
         <View style={styles.topoNav} role="navigation">
+          <View style={styles.topoTrilho}>
           {itens.map((item) => {
             const ativo = item.id === ativa;
             return (
@@ -1594,6 +1651,7 @@ function BarraTopo({
               </Pressable>
             );
           })}
+          </View>
         </View>
 
         <Pressable
@@ -1605,10 +1663,8 @@ function BarraTopo({
             (estado as { hovered?: boolean }).hovered && styles.topoItemHover,
           ]}
         >
-          <View style={styles.barraAvatar}>
-            <Text style={styles.barraAvatarTexto}>{iniciais(me?.nome)}</Text>
-          </View>
-          <ChevronDown color={color.muted} size={16} strokeWidth={2} />
+          <Avatar nome={me?.nome} />
+          <ChevronDown color={color.onHeaderMuted} size={16} strokeWidth={2} />
         </Pressable>
       </View>
     </View>
@@ -1670,16 +1726,24 @@ function PerfilCard({ me }: { me: FuncionarioResponse | null }) {
   return (
     <View style={styles.perfilCard}>
       <View style={styles.perfilTopo}>
-        <View style={styles.perfilAvatar}>
-          <Text style={styles.perfilAvatarTexto}>{iniciais(me?.nome)}</Text>
+        <View style={styles.perfilFaixa} importantForAccessibility="no-hide-descendants">
+          <Brilho variante="claro" />
         </View>
+        <View style={styles.perfilAvatarAnel}>
+          <Avatar nome={me?.nome} tamanho={84} />
+        </View>
+        {me ? (
+          <View style={styles.perfilPapel}>
+            <Text style={styles.perfilPapelTexto}>{labelsPerfilLongo[me.perfil]}</Text>
+          </View>
+        ) : null}
         <Text style={styles.perfilNome}>{me?.nome ?? 'Usuário'}</Text>
         <Text style={styles.perfilData}>{dataPorExtenso()}</Text>
       </View>
       <View style={styles.perfilLista}>
         {linhas.map(({ Icone, texto, rotulo }) => (
           <View key={rotulo} style={styles.perfilLinha} accessibilityLabel={`${rotulo}: ${texto}`}>
-            <Icone color={color.muted} size={17} strokeWidth={1.8} />
+            <Icone color={color.brand} size={17} strokeWidth={1.9} />
             <Text style={styles.perfilLinhaTexto} numberOfLines={1}>{texto}</Text>
           </View>
         ))}
@@ -1719,6 +1783,7 @@ function BarraSuperior({
   return (
     <View style={styles.barraSuperior}>
       <View style={styles.barraMarca}>
+        <AlternarTema />
         <View style={styles.barraSelo}>
           <Image
             source={require('../../assets/images/logo-conformia.png')}
@@ -1730,12 +1795,11 @@ function BarraSuperior({
       </View>
       <Pressable
         onPress={onConta}
-        style={styles.barraAvatar}
         accessibilityRole="button"
         accessibilityLabel="Abrir menu da conta"
         hitSlop={6}
       >
-        <Text style={styles.barraAvatarTexto}>{iniciais(me?.nome)}</Text>
+        <Avatar nome={me?.nome} />
       </Pressable>
     </View>
   );
@@ -1772,8 +1836,8 @@ function NavegacaoInferior({
             accessibilityState={{ selected: ativo }}
             accessibilityLabel={item.label}
           >
-            <View>
-              <Icone color={ativo ? color.brand : color.muted} size={22} strokeWidth={ativo ? 2.2 : 1.8} />
+            <View style={[styles.barraInferiorIcone, ativo && styles.barraInferiorIconeAtivo]}>
+              <Icone color={ativo ? color.brandStrong : color.muted} size={22} strokeWidth={ativo ? 2.2 : 1.8} />
               {item.id === 'inicio' && pendencias > 0 ? <View style={styles.pontoAviso} /> : null}
             </View>
             <Text
@@ -1793,7 +1857,9 @@ function NavegacaoInferior({
           accessibilityState={{ selected: maisAtivo }}
           accessibilityLabel="Mais opções"
         >
-          <Menu color={maisAtivo ? color.brand : color.muted} size={22} strokeWidth={maisAtivo ? 2.2 : 1.8} />
+          <View style={[styles.barraInferiorIcone, maisAtivo && styles.barraInferiorIconeAtivo]}>
+            <Menu color={maisAtivo ? color.brandStrong : color.muted} size={22} strokeWidth={maisAtivo ? 2.2 : 1.8} />
+          </View>
           <Text style={[styles.barraInferiorTexto, maisAtivo && styles.barraInferiorTextoAtivo]}>
             Mais
           </Text>
@@ -1826,9 +1892,7 @@ function FolhaMenu({
       <View style={styles.folha}>
         <View style={styles.folhaAlca} />
         <View style={styles.folhaConta}>
-          <View style={styles.barraAvatar}>
-            <Text style={styles.barraAvatarTexto}>{iniciais(me?.nome)}</Text>
-          </View>
+          <Avatar nome={me?.nome} />
           <View style={styles.flex1}>
             <Text style={styles.folhaNome} numberOfLines={1}>{me?.nome ?? 'Usuário'}</Text>
             <Text style={styles.folhaPerfil} numberOfLines={1}>
@@ -1893,7 +1957,7 @@ function Mural({
               accessibilityRole="button"
               accessibilityLabel={`${notificacao.titulo}. ${notificacao.descricao}`}
             >
-              <View style={styles.notificacaoMarcador} />
+              <IconeModulo aba={notificacao.aba} pequeno />
               <View style={styles.notificacaoConteudo}>
                 <Text style={styles.notificacaoTitulo}>{notificacao.titulo}</Text>
                 <Text style={styles.notificacaoDescricao} numberOfLines={2}>{notificacao.descricao}</Text>
@@ -2557,7 +2621,7 @@ function formatarDataHora(valor: string): string {
   });
 }
 
-const senhaStyles = StyleSheet.create({
+const senhaStyles = estilos(() => ({
   overlay: { flex: 1, backgroundColor: 'rgba(23,33,28,0.48)', alignItems: 'center', justifyContent: 'center', padding: 20 },
   modal: { width: '100%', maxWidth: 440, backgroundColor: color.surface, borderRadius: radius.lg, padding: 24, gap: 14 },
   title: { color: color.ink, ...type.title, fontWeight: '600' },
@@ -2565,9 +2629,9 @@ const senhaStyles = StyleSheet.create({
   input: { minHeight: 44, borderWidth: 1, borderColor: color.lineStrong, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 10, color: color.ink, ...type.body },
   actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8, marginTop: 4 },
   error: { color: color.danger, backgroundColor: color.dangerSoft, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 10, ...type.small },
-});
+}));
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   safe: {
     flex: 1,
     backgroundColor: color.canvas,
@@ -2589,6 +2653,10 @@ const styles = StyleSheet.create({
   },
 
   // Estrutura
+  luzPagina: {
+    bottom: undefined,
+    height: 420,
+  },
   shellLinha: {
     flex: 1,
     flexDirection: 'row',
@@ -2622,9 +2690,11 @@ const styles = StyleSheet.create({
 
   // Barra superior (desktop)
   topo: {
-    backgroundColor: color.surface,
+    backgroundColor: color.header,
     borderBottomWidth: 1,
-    borderBottomColor: color.line,
+    borderBottomColor: color.headerLine,
+    zIndex: 2,
+    ...elevacao.barra,
   },
   topoInterno: {
     width: '100%',
@@ -2642,9 +2712,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   topoMarcaNome: {
-    color: color.ink,
+    color: color.onHeader,
     ...type.lead,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   topoNav: {
     flex: 1,
@@ -2652,29 +2722,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  topoTrilho: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 2,
+    padding: 4,
+    borderRadius: radius.pill,
+    backgroundColor: color.navTrack,
   },
   topoItem: {
-    height: 38,
+    height: 34,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 11,
-    borderRadius: radius.md,
+    paddingHorizontal: 12,
+    borderRadius: radius.pill,
   },
   topoItemHover: {
-    backgroundColor: color.canvas,
+    backgroundColor: color.navHover,
   },
   topoItemAtivo: {
-    backgroundColor: color.brandSoft,
+    backgroundColor: color.navActive,
+    ...elevacao.pilula,
   },
   topoItemTexto: {
-    color: color.text,
-    ...type.body,
+    color: color.onHeaderMuted,
+    ...type.small,
     fontWeight: '500',
   },
   topoItemTextoAtivo: {
-    color: color.brandStrong,
+    color: color.onHeader,
     fontWeight: '600',
   },
   topoConta: {
@@ -2698,10 +2776,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.line,
     padding: 8,
-    shadowColor: '#17211C',
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 8 },
+    ...elevacao.flutuante,
   },
   menuContaCabecalho: {
     paddingHorizontal: 10,
@@ -2719,28 +2794,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.line,
     overflow: 'hidden',
+    ...elevacao.cartao,
   },
   perfilTopo: {
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 28,
+    paddingTop: 40,
     paddingBottom: 20,
     gap: 4,
     borderBottomWidth: 1,
     borderBottomColor: color.line,
   },
-  perfilAvatar: {
-    width: 88,
+  perfilFaixa: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     height: 88,
-    borderRadius: 44,
-    backgroundColor: color.brand,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
+    backgroundColor: color.sunken,
+    overflow: 'hidden',
   },
-  perfilAvatarTexto: {
-    color: color.onBrand,
-    ...type.heading,
+  perfilAvatarAnel: {
+    padding: 4,
+    borderRadius: 999,
+    backgroundColor: color.surface,
+    marginBottom: 6,
+  },
+  perfilPapel: {
+    borderRadius: radius.pill,
+    backgroundColor: color.brandSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    marginBottom: 4,
+  },
+  perfilPapelTexto: {
+    color: color.brandStrong,
+    ...type.caption,
     fontWeight: '600',
   },
   perfilNome: {
@@ -2774,7 +2863,7 @@ const styles = StyleSheet.create({
     height: 20,
     paddingHorizontal: 6,
     borderRadius: 10,
-    backgroundColor: color.brand,
+    backgroundColor: color.accent,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -2782,9 +2871,9 @@ const styles = StyleSheet.create({
     backgroundColor: color.surface,
   },
   contadorTexto: {
-    color: color.onBrand,
+    color: color.onAccent,
     ...type.caption,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   contadorTextoInvertido: {
     color: color.brandDeep,
@@ -2797,9 +2886,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    backgroundColor: color.surface,
+    backgroundColor: color.header,
     borderBottomWidth: 1,
-    borderBottomColor: color.line,
+    borderBottomColor: color.headerLine,
+    zIndex: 2,
+    ...elevacao.barra,
   },
   barraMarca: {
     flex: 1,
@@ -2815,6 +2906,7 @@ const styles = StyleSheet.create({
     backgroundColor: color.brand,
     alignItems: 'center',
     justifyContent: 'center',
+    ...elevacao.pilula,
   },
   barraLogo: {
     width: 20,
@@ -2822,37 +2914,54 @@ const styles = StyleSheet.create({
   },
   barraTitulo: {
     flex: 1,
-    color: color.ink,
+    color: color.onHeader,
     ...type.lead,
     fontWeight: '600',
   },
-  barraAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: color.brandSoft,
+  avatar: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  barraAvatarTexto: {
-    color: color.brandStrong,
+  avatarTexto: {
     ...type.small,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  moduloIcone: {
+    borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
+    shadowOpacity: 0.32,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   barraInferior: {
     flexDirection: 'row',
-    backgroundColor: color.surface,
+    backgroundColor: color.header,
     borderTopWidth: 1,
-    borderTopColor: color.line,
+    borderTopColor: color.headerLine,
     paddingTop: 6,
     paddingBottom: Platform.OS === 'ios' ? 2 : 8,
   },
   barraInferiorItem: {
     flex: 1,
-    minHeight: 52,
+    minHeight: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
+    gap: 2,
+  },
+  barraInferiorIcone: {
+    width: 56,
+    height: 30,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  barraInferiorIconeAtivo: {
+    backgroundColor: color.brandSoft,
   },
   barraInferiorTexto: {
     color: color.muted,
@@ -2860,7 +2969,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   barraInferiorTextoAtivo: {
-    color: color.brand,
+    color: color.brandStrong,
     fontWeight: '600',
   },
   pontoAviso: {
@@ -2922,7 +3031,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   folhaItemAtivo: {
-    backgroundColor: color.sunken,
+    backgroundColor: color.brandSoft,
   },
   folhaItemTexto: {
     color: color.ink,
@@ -2940,7 +3049,7 @@ const styles = StyleSheet.create({
   // Cabeçalho da página
   paginaCabecalho: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
     marginBottom: 4,
@@ -2997,6 +3106,8 @@ const styles = StyleSheet.create({
     backgroundColor: color.warningSoft,
     borderWidth: 1,
     borderColor: color.warningLine,
+    borderLeftWidth: 4,
+    borderLeftColor: tons.ambar.solido,
     borderRadius: radius.lg,
     padding: 20,
     gap: 6,
@@ -3042,6 +3153,7 @@ const styles = StyleSheet.create({
     borderColor: color.line,
     padding: 20,
     gap: 12,
+    ...elevacao.cartao,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -3072,13 +3184,7 @@ const styles = StyleSheet.create({
     borderTopColor: color.line,
   },
   notificacaoHover: {
-    backgroundColor: color.canvas,
-  },
-  notificacaoMarcador: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: color.brand,
+    backgroundColor: color.sunken,
   },
   notificacaoConteudo: {
     flex: 1,
@@ -3263,4 +3369,4 @@ const styles = StyleSheet.create({
     ...type.body,
     fontWeight: '600',
   },
-});
+}));

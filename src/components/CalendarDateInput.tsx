@@ -3,13 +3,12 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, type } from '@/constants/theme';
 
 export function CalendarDateInput({
   label,
@@ -188,7 +187,7 @@ function buildMonth(date: Date): (Date | null)[] {
   ];
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   field: { ...ui.field, flex: 1, minWidth: 160 },
   label: ui.label,
   required: ui.required,
@@ -213,4 +212,4 @@ const styles = StyleSheet.create({
   dayTextActive: { color: color.onBrand, fontWeight: '600' },
   closeButton: { ...ui.btn, ...ui.btnSecondary, alignSelf: 'flex-end' },
   closeButtonText: ui.btnText,
-});
+}));

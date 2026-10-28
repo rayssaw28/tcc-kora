@@ -16,6 +16,12 @@ export default function Root({ children }: PropsWithChildren) {
           href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap"
         />
         <ScrollViewStyleReset />
+        {/* Aplica o tema salvo antes do primeiro desenho, evitando o clarão ao recarregar no modo escuro. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{if(localStorage.getItem('conformia_tema')==='escuro'){document.documentElement.dataset.tema='escuro';document.documentElement.style.colorScheme='dark'}}catch(e){}",
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>

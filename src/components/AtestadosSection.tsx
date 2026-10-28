@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Modal,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -16,7 +15,7 @@ import { baixarArquivo } from '@/api/download';
 import { ApiError, AtestadoResponse, StatusDocumento } from '@/api/types';
 import { CalendarDateInput } from '@/components/CalendarDateInput';
 import { AddButton, Badge, ui } from '@/components/ui';
-import { color } from '@/constants/theme';
+import { color, estilos } from '@/constants/theme';
 
 type Arquivo = { uri: string; name: string; type: string };
 
@@ -337,7 +336,7 @@ function mensagemErro(e: unknown, fallback: string): string {
   return fallback;
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   section: ui.section,
   header: ui.header,
   headerText: ui.headerText,
@@ -367,4 +366,4 @@ const styles = StyleSheet.create({
   send: { ...ui.btn, ...ui.btnPrimary },
   disabled: ui.btnDisabled,
   error: ui.error,
-});
+}));

@@ -3,7 +3,6 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   useWindowDimensions,
   View,
@@ -23,7 +22,7 @@ import {
 import { OrganogramaNode } from '@/api/types';
 import { SearchInput } from '@/components/SearchInput';
 import { ui } from '@/components/ui';
-import { color, radius, type } from '@/constants/theme';
+import { color, estilos, radius, tomDoNome, type } from '@/constants/theme';
 
 type Pessoa = OrganogramaNode & {
   gestorId: number | null;
@@ -547,16 +546,18 @@ function Avatar({
   pequeno?: boolean;
   grande?: boolean;
 }) {
+  const tom = tomDoNome(nome);
   return (
     <View
       style={[
         styles.avatar,
+        { backgroundColor: tom.suave },
         pequeno && styles.avatarPequeno,
         grande && styles.avatarGrande,
         destaque && styles.avatarDestaque,
       ]}
     >
-      <Text style={[styles.avatarTexto, pequeno && styles.avatarTextoPequeno, destaque && styles.avatarTextoDestaque]}>
+      <Text style={[styles.avatarTexto, { color: tom.texto }, pequeno && styles.avatarTextoPequeno, destaque && styles.avatarTextoDestaque]}>
         {iniciais(nome)}
       </Text>
     </View>
@@ -608,7 +609,7 @@ function iniciais(nome: string): string {
 const LARGURA_CARD = 220;
 const ALTURA_LIGACAO = 18;
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   secao: { gap: 14 },
   ferramentas: {
     flexDirection: 'row',
@@ -732,7 +733,7 @@ const styles = StyleSheet.create({
   avatarPequeno: { width: 30, height: 30, borderRadius: 15 },
   avatarGrande: { width: 48, height: 48, borderRadius: 24 },
   avatarDestaque: { backgroundColor: color.brand },
-  avatarTexto: { color: color.brandStrong, ...type.small, fontWeight: '600' },
+  avatarTexto: { color: color.brandStrong, ...type.small, fontWeight: '700' },
   avatarTextoPequeno: { ...type.caption, fontWeight: '600' },
   avatarTextoDestaque: { color: color.onBrand },
 
@@ -769,4 +770,4 @@ const styles = StyleSheet.create({
   },
   infoValor: { color: color.ink, ...type.small, fontWeight: '600' },
   focarBotao: { alignSelf: 'flex-start' },
-});
+}));
