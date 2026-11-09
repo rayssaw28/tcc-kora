@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   SafeAreaView,
@@ -14,86 +15,194 @@ import {
 } from 'react-native';
 import { isAxiosError } from 'axios';
 import { router } from 'expo-router';
-import { Eye, EyeOff } from 'lucide-react-native';
+import Head from 'expo-router/head';
+import { CircleAlert, Eye, EyeOff } from 'lucide-react-native';
 
 import { login } from '@/api/auth';
 import { ApiError } from '@/api/types';
 import { AlternarTema } from '@/components/AlternarTema';
 import { Brilho } from '@/components/Brilho';
-import { color, estilos, radius, type } from '@/constants/theme';
+import { Badge, type Tom } from '@/components/ui';
+import { RH_CONTATO_EMAIL } from '@/config';
+import { color, elevacao, estilos, radius, type } from '@/constants/theme';
 
-// O painel com degradê é escuro nos dois modos; `onBrand` inverte no modo escuro,
-// então os textos sobre ele usam cores claras fixas.
-const SOBRE_PAINEL = '#FFFFFF';
-const SOBRE_PAINEL_SUAVE = '#FFFFFF';
+// Conta da demonstração: só existe no build de desenvolvimento, nunca em produção.
+const CONTA_DEMO = __DEV__ ? { email: 'admin@korainc.com.br', senha: 'Admin@123' } : null;
+
+// Recorte ilustrativo do mural exibido no painel lateral (dados fictícios).
+const MURAL_EXEMPLO: { titulo: string; status: string; tom: Tom }[] = [
+  { titulo: 'Comprovante de residência', status: 'Aprovado', tom: 'ok' },
+  { titulo: 'Holerite de outubro', status: 'Disponível', tom: 'info' },
+  { titulo: 'Atestado médico', status: 'Em análise', tom: 'warn' },
+];
+
+// Rascunho do formulário. A troca de tema recria as telas (a `key` do _layout.tsx), e isso
+// não pode apagar o que a pessoa digitou. Fica só em memória, nunca em disco.
+const rascunho = { email: '', senha: '', ajudaAberta: false };
+
+type ErroLogin = {
+  mensagem: string;
+  campo: 'email' | 'senha' | 'ambos' | null;
+};
 
 export default function LoginScreen() {
-  const { width } = useWindowDimensions();
-  const [email, setEmail] = useState('admin@korainc.com.br');
-  const [senha, setSenha] = useState('Admin@123');
+  const { width, height } = useWindowDimensions();
+  const [email, setEmail] = useState(rascunho.email);
+  const [senha, setSenha] = useState(rascunho.senha);
   const [senhaVisivel, setSenhaVisivel] = useState(false);
+  const [ajudaAberta, setAjudaAberta] = useState(rascunho.ajudaAberta);
   const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
+  const [erro, setErro] = useState<ErroLogin | null>(null);
   const [focado, setFocado] = useState<'email' | 'senha' | null>(null);
+  const emailRef = useRef<TextInput>(null);
+  const senhaRef = useRef<TextInput>(null);
+  const rolagemRef = useRef<ScrollView>(null);
   const amplo = width >= 900;
+  // Em telas baixas o recorte do mural não cabe no painel; fica só a frase.
+  const mostrarMural = height >= 680;
+
+  function alterarEmail(valor: string) {
+    rascunho.email = valor;
+    setEmail(valor);
+    setErro(null);
+  }
+
+  function alterarSenha(valor: string) {
+    rascunho.senha = valor;
+    setSenha(valor);
+    setErro(null);
+  }
+
+  function definirAjuda(aberta: boolean) {
+    rascunho.ajudaAberta = aberta;
+    setAjudaAberta(aberta);
+  }
+
+  /** Mostra o erro e leva o foco ao campo que precisa de atenção. */
+  function falhar(e: ErroLogin) {
+    setErro(e);
+    (e.campo === 'email' ? emailRef : e.campo ? senhaRef : null)?.current?.focus();
+  }
 
   async function entrar() {
-    if (!email.trim() || !senha) {
-      setErro('Preencha o e-mail e a senha para entrar.');
+    const emailLimpo = email.trim();
+    if (!emailLimpo) {
+      falhar({ mensagem: 'Informe o e-mail corporativo.', campo: 'email' });
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(emailLimpo)) {
+      falhar({ mensagem: 'Confira o e-mail: ele deve ter o formato nome@empresa.com.br.', campo: 'email' });
+      return;
+    }
+    if (!senha) {
+      falhar({ mensagem: 'Informe a senha.', campo: 'senha' });
       return;
     }
     setErro(null);
     setCarregando(true);
     try {
-      await login(email.trim(), senha);
+      await login(emailLimpo, senha);
+      rascunho.email = '';
+      rascunho.senha = '';
+      rascunho.ajudaAberta = false;
       router.replace('/home');
     } catch (e) {
-      if (isAxiosError(e)) {
-        const data = e.response?.data as ApiError | undefined;
-        setErro(
-          data?.message
-            ?? 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
-        );
+      if (!isAxiosError(e)) {
+        falhar({ mensagem: 'Algo impediu o login. Tente novamente em instantes.', campo: null });
+      } else if (!e.response) {
+        falhar({
+          mensagem: 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
+          campo: null,
+        });
+      } else if (e.response.status === 401) {
+        falhar({
+          mensagem: 'E-mail ou senha incorretos. Confira e tente de novo. Se esqueceu a senha, veja as instruções abaixo.',
+          campo: 'ambos',
+        });
+        // O caminho de recuperação é um só: o link abaixo do botão, aberto e à vista.
+        definirAjuda(true);
+        setTimeout(() => rolagemRef.current?.scrollToEnd({ animated: true }), 80);
+      } else if (e.response.status >= 500) {
+        falhar({ mensagem: 'O sistema está indisponível no momento. Tente de novo em instantes.', campo: null });
       } else {
-        setErro('Algo impediu o login. Tente novamente em instantes.');
+        const data = e.response.data as ApiError | undefined;
+        falhar({ mensagem: data?.message ?? 'Não foi possível entrar. Tente novamente.', campo: null });
       }
     } finally {
       setCarregando(false);
     }
   }
 
+  const erroNoEmail = erro?.campo === 'email' || erro?.campo === 'ambos';
+  const erroNaSenha = erro?.campo === 'senha' || erro?.campo === 'ambos';
+  // Erros de um campo aparecem junto dele; rede, servidor e credenciais ficam na faixa geral.
+  const erroGeral = erro && (erro.campo === 'ambos' || erro.campo === null) ? erro : null;
+
   return (
     <SafeAreaView style={styles.safe}>
+      <Head>
+        <title>Entrar · Conformia</title>
+      </Head>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={[styles.flex, amplo && styles.linha]}>
-          {!amplo ? <AlternarTema style={styles.temaCompacto} /> : null}
           {amplo ? (
             <View style={styles.painelMarca}>
-              <Brilho variante="escuro" />
+              <Brilho variante="claro" />
               <View style={styles.painelTopo}>
-                <AlternarTema sobreEscuro />
                 <Marca />
+                <AlternarTema />
               </View>
-              <Text style={styles.painelTexto}>
-                Documentos, holerites, jornada e avaliações da sua equipe em um só lugar.
-              </Text>
-              <Text style={styles.painelRodape}>Plataforma de gestão de pessoas</Text>
+              <View style={styles.painelCorpo}>
+                <Text style={styles.painelTexto}>
+                  Holerites, documentos e pendências sem precisar pedir ao RH.
+                </Text>
+                {mostrarMural ? (
+                  <>
+                    <View
+                      style={styles.mural}
+                      aria-hidden
+                      importantForAccessibility="no-hide-descendants"
+                    >
+                      <Text style={styles.muralTitulo}>Seu mural</Text>
+                      {MURAL_EXEMPLO.map((item) => (
+                        <View key={item.titulo} style={styles.muralLinha}>
+                          <Text style={styles.muralItem} numberOfLines={1}>{item.titulo}</Text>
+                          <Badge label={item.status} tom={item.tom} />
+                        </View>
+                      ))}
+                    </View>
+                    <Text
+                      style={styles.painelLegenda}
+                      aria-hidden
+                      importantForAccessibility="no-hide-descendants"
+                    >
+                      Exemplo ilustrativo, com dados fictícios.
+                    </Text>
+                  </>
+                ) : null}
+              </View>
             </View>
           ) : null}
 
           <ScrollView
+            ref={rolagemRef}
             style={styles.flex}
             contentContainerStyle={[styles.formArea, !amplo && styles.formAreaCompacta]}
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.form}>
-              {!amplo ? <Marca compacta /> : null}
+              {!amplo ? (
+                <View style={styles.topoCompacto}>
+                  <Marca />
+                  <AlternarTema />
+                </View>
+              ) : null}
 
               <View style={styles.cabecalho}>
-                <Text style={styles.titulo}>Entrar</Text>
+                <Text style={styles.titulo} accessibilityRole="header" aria-level={1}>Entrar</Text>
                 <Text style={styles.subtitulo}>
                   Use o e-mail corporativo e a senha que você recebeu do RH.
                 </Text>
@@ -102,9 +211,14 @@ export default function LoginScreen() {
               <View style={styles.campo}>
                 <Text style={styles.label} nativeID="label-email">E-mail corporativo</Text>
                 <TextInput
-                  style={[styles.input, focado === 'email' && styles.inputFocado]}
+                  ref={emailRef}
+                  style={[
+                    styles.input,
+                    focado === 'email' && styles.inputFocado,
+                    erroNoEmail && styles.inputErro,
+                  ]}
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={alterarEmail}
                   onFocus={() => setFocado('email')}
                   onBlur={() => setFocado(null)}
                   autoCapitalize="none"
@@ -114,17 +228,32 @@ export default function LoginScreen() {
                   placeholder="nome@empresa.com.br"
                   placeholderTextColor={color.placeholder}
                   accessibilityLabelledBy="label-email"
+                  aria-invalid={erroNoEmail}
+                  aria-describedby={erro?.campo === 'email' ? 'erro-email' : undefined}
                   returnKeyType="next"
+                  blurOnSubmit={false}
+                  onSubmitEditing={() => senhaRef.current?.focus()}
                 />
+                {erro?.campo === 'email' ? <ErroCampo id="erro-email" mensagem={erro.mensagem} /> : null}
               </View>
 
               <View style={styles.campo}>
                 <Text style={styles.label} nativeID="label-senha">Senha</Text>
-                <View style={[styles.input, styles.inputSenha, focado === 'senha' && styles.inputFocado]}>
+                <View
+                  style={[
+                    styles.input,
+                    styles.inputSenha,
+                    focado === 'senha' && styles.inputFocado,
+                    erroNaSenha && styles.inputErro,
+                  ]}
+                >
                   <TextInput
+                    ref={senhaRef}
                     style={styles.inputSenhaTexto}
                     value={senha}
-                    onChangeText={setSenha}
+                    onChangeText={alterarSenha}
+                    aria-invalid={erroNaSenha}
+                    aria-describedby={erro?.campo === 'senha' ? 'erro-senha' : undefined}
                     onFocus={() => setFocado('senha')}
                     onBlur={() => setFocado(null)}
                     secureTextEntry={!senhaVisivel}
@@ -147,10 +276,18 @@ export default function LoginScreen() {
                       : <Eye color={color.muted} size={18} strokeWidth={2} />}
                   </Pressable>
                 </View>
+                {erro?.campo === 'senha' ? <ErroCampo id="erro-senha" mensagem={erro.mensagem} /> : null}
               </View>
 
-              {erro ? (
-                <Text style={styles.erro} accessibilityRole="alert">{erro}</Text>
+              {erroGeral ? (
+                <View style={styles.erro} accessibilityRole="alert">
+                  <View style={styles.erroIcone}>
+                    <CircleAlert color={color.danger} size={18} strokeWidth={2} />
+                  </View>
+                  <View style={styles.erroCorpo}>
+                    <Text style={styles.erroTexto}>{erroGeral.mensagem}</Text>
+                  </View>
+                </View>
               ) : null}
 
               <Pressable
@@ -171,9 +308,55 @@ export default function LoginScreen() {
                 )}
               </Pressable>
 
-              <Text style={styles.ajuda}>
-                Esqueceu a senha? Peça ao RH para redefinir seu acesso.
-              </Text>
+              <View style={styles.ajudaBloco}>
+                <Pressable
+                  onPress={() => definirAjuda(!ajudaAberta)}
+                  style={styles.ajudaLink}
+                  accessibilityRole="button"
+                  aria-expanded={ajudaAberta}
+                  hitSlop={8}
+                >
+                  <Text style={styles.ajudaLinkTexto}>Esqueci minha senha</Text>
+                </Pressable>
+                {ajudaAberta ? (
+                  <View style={styles.ajudaPainel}>
+                    <Text style={styles.ajudaTexto}>
+                      O RH redefine o seu acesso e informa uma senha temporária, que você troca no
+                      próximo login.
+                    </Text>
+                    {RH_CONTATO_EMAIL ? (
+                      <Pressable
+                        onPress={() => Linking.openURL(`mailto:${RH_CONTATO_EMAIL}`)}
+                        style={styles.ajudaLink}
+                        accessibilityRole="link"
+                      >
+                        <Text style={styles.ajudaLinkTexto}>Escrever para {RH_CONTATO_EMAIL}</Text>
+                      </Pressable>
+                    ) : (
+                      <Text style={styles.ajudaTexto}>
+                        Fale com o RH da sua empresa, por e-mail ou pessoalmente.
+                      </Text>
+                    )}
+                    <Text style={styles.ajudaTexto}>
+                      Se você é do RH, peça a outra pessoa com acesso administrativo, ou ao
+                      administrador do sistema, para redefinir a sua senha.
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+
+              {CONTA_DEMO ? (
+                <Pressable
+                  onPress={() => {
+                    alterarEmail(CONTA_DEMO.email);
+                    alterarSenha(CONTA_DEMO.senha);
+                  }}
+                  style={styles.ajudaLink}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.demoTexto}>Preencher com a conta de demonstração</Text>
+                </Pressable>
+              ) : null}
             </View>
           </ScrollView>
         </View>
@@ -182,10 +365,20 @@ export default function LoginScreen() {
   );
 }
 
-function Marca({ compacta = false }: { compacta?: boolean }) {
+/** Mensagem de validação junto do campo; `id` liga o texto ao campo via aria-describedby. */
+function ErroCampo({ id, mensagem }: { id: string; mensagem: string }) {
+  return (
+    <View style={styles.erroCampo} accessibilityRole="alert">
+      <CircleAlert color={color.danger} size={14} strokeWidth={2} />
+      <Text style={styles.erroCampoTexto} nativeID={id}>{mensagem}</Text>
+    </View>
+  );
+}
+
+function Marca() {
   return (
     <View style={styles.marca}>
-      <View style={[styles.marcaSelo, compacta && styles.marcaSeloCompacto]}>
+      <View style={styles.marcaSelo}>
         <Image
           source={require('../../assets/images/logo-conformia.png')}
           style={styles.marcaImagem}
@@ -193,7 +386,7 @@ function Marca({ compacta = false }: { compacta?: boolean }) {
           accessibilityIgnoresInvertColors
         />
       </View>
-      <Text style={[styles.marcaNome, compacta && styles.marcaNomeCompacto]}>Conformia</Text>
+      <Text style={styles.marcaNome}>Conformia</Text>
     </View>
   );
 }
@@ -212,32 +405,66 @@ const styles = estilos(() => ({
   painelTopo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    justifyContent: 'space-between',
   },
-  temaCompacto: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    zIndex: 2,
+  topoCompacto: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   painelMarca: {
     width: '42%',
     maxWidth: 560,
-    backgroundColor: color.noite,
+    backgroundColor: color.brandSoft,
     overflow: 'hidden',
-    paddingHorizontal: 56,
+    paddingHorizontal: 48,
     paddingVertical: 48,
     justifyContent: 'space-between',
   },
+  painelCorpo: {
+    gap: 24,
+  },
   painelTexto: {
     maxWidth: 400,
-    color: SOBRE_PAINEL,
+    color: color.ink,
     ...type.display,
     fontWeight: '500',
   },
-  painelRodape: {
-    color: SOBRE_PAINEL_SUAVE,
+  painelLegenda: {
+    color: color.text,
     ...type.small,
+  },
+  mural: {
+    backgroundColor: color.surface,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: color.line,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 4,
+    ...elevacao.cartao,
+  },
+  muralTitulo: {
+    color: color.ink,
+    ...type.lead,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  muralLinha: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: color.line,
+  },
+  muralItem: {
+    flex: 1,
+    minWidth: 0,
+    color: color.ink,
+    ...type.body,
+    fontWeight: '600',
   },
   marca: {
     flexDirection: 'row',
@@ -248,24 +475,18 @@ const styles = estilos(() => ({
     width: 36,
     height: 36,
     borderRadius: radius.md,
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: color.brand,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  marcaSeloCompacto: {
-    backgroundColor: color.brand,
   },
   marcaImagem: {
     width: 24,
     height: 24,
   },
   marcaNome: {
-    color: SOBRE_PAINEL,
+    color: color.ink,
     ...type.lead,
     fontWeight: '600',
-  },
-  marcaNomeCompacto: {
-    color: color.ink,
   },
   formArea: {
     flexGrow: 1,
@@ -339,12 +560,39 @@ const styles = estilos(() => ({
     justifyContent: 'center',
     borderRadius: radius.sm,
   },
+  inputErro: {
+    borderColor: color.danger,
+  },
   erro: {
-    color: color.danger,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
     backgroundColor: color.dangerSoft,
     borderRadius: radius.md,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 12,
+  },
+  erroIcone: {
+    marginTop: 2,
+  },
+  erroCorpo: {
+    flex: 1,
+    minWidth: 0,
+    gap: 4,
+  },
+  erroTexto: {
+    color: color.danger,
+    ...type.body,
+  },
+  erroCampo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+  },
+  erroCampoTexto: {
+    flex: 1,
+    minWidth: 0,
+    color: color.danger,
     ...type.small,
   },
   botao: {
@@ -366,8 +614,33 @@ const styles = estilos(() => ({
     ...type.body,
     fontWeight: '600',
   },
-  ajuda: {
+  ajudaBloco: {
+    gap: 8,
+  },
+  ajudaLink: {
+    alignSelf: 'flex-start',
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  ajudaLinkTexto: {
+    color: color.brand,
+    ...type.body,
+    fontWeight: '600',
+  },
+  ajudaPainel: {
+    gap: 8,
+    backgroundColor: color.sunken,
+    borderRadius: radius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  ajudaTexto: {
+    color: color.text,
+    ...type.small,
+  },
+  demoTexto: {
     color: color.muted,
     ...type.small,
+    fontWeight: '500',
   },
 }));

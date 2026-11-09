@@ -33,6 +33,7 @@ import {
   FileText,
   Home,
   LogOut,
+  KeyRound,
   Mail,
   Menu,
   Network,
@@ -43,6 +44,8 @@ import {
   Wallet,
   X,
 } from 'lucide-react-native';
+
+import Head from 'expo-router/head';
 
 import { api } from '@/api/client';
 import { getTrocaSenhaObrigatoria, limparTrocaSenhaObrigatoria, logout } from '@/api/auth';
@@ -169,6 +172,7 @@ export default function HomeScreen() {
   }, [aba]);
   const [maisAberto, setMaisAberto] = useState(false);
   const [contaAberta, setContaAberta] = useState(false);
+  const [senhaAberta, setSenhaAberta] = useState(false);
   const [me, setMe] = useState<FuncionarioResponse | null>(null);
   const [funcionarios, setFuncionarios] = useState<FuncionarioResponse[]>([]);
   const [funcionariosDesligados, setFuncionariosDesligados] = useState<FuncionarioResponse[]>([]);
@@ -739,6 +743,15 @@ export default function HomeScreen() {
     .filter((tab) => tab.id !== 'holerites' || isAdmin || isGestor)
     .filter((tab) => tab.id !== 'pessoal' || !isAdmin);
 
+  // No celular o RH trabalha em Jornada e Colaboradores: eles ficam na barra inferior, não em "Mais".
+  const prioridadeRh: Aba[] = ['inicio', 'jornada', 'colaboradores', 'holerites'];
+  const navegacaoMobile = isAdmin
+    ? [
+      ...prioridadeRh.flatMap((id) => navegacao.filter((tab) => tab.id === id)),
+      ...navegacao.filter((tab) => !prioridadeRh.includes(tab.id)),
+    ]
+    : navegacao;
+
   const notificacoes = (isAdmin
     ? montarNotificacoes([], [], [], [], [], null, solicitacoesRh)
     : montarNotificacoes(
@@ -762,7 +775,9 @@ export default function HomeScreen() {
 
   const cabecalho = cabecalhoDaAba(aba, me, isAdmin);
 
-  const lateralInicio = (
+  // A conta administrativa não tem termo LGPD a assinar e troca a senha pelo menu da conta:
+  // sem coluna lateral na home.
+  const lateralInicio = isAdmin ? null : (
     <Inicio
       consentimentos={consentimentos}
       termoLgpd={termoLgpd}
@@ -773,20 +788,36 @@ export default function HomeScreen() {
     />
   );
 
+  // Atalhos do RH: contam só o que ainda não foi aberto e levam à primeira pendência de cada tipo.
+  const atalhosRh = isAdmin
+    ? ([
+      { rotulo: 'Atestados', secao: 'jornada' },
+      { rotulo: 'Pré-admissões', secao: 'dados' },
+      { rotulo: 'Documentos', secao: 'documentos' },
+    ] as const).map(({ rotulo, secao }) => {
+      const pendentes = notificacoes.filter(
+        (notificacao) => notificacao.aba === 'colaboradores' && notificacao.secaoColaborador === secao,
+      );
+      return { rotulo, valor: pendentes.length, onPress: () => abrirNotificacao(pendentes[pendentes.length - 1]) };
+    })
+    : undefined;
+
   const conteudo = (
     <>
-      {aba !== 'inicio' || colunasInicio === 1 ? (
-        <View style={styles.paginaCabecalho}>
-          <IconeModulo aba={aba} grande={desktopWeb} />
-          <View style={styles.paginaTituloBloco}>
-            <Text style={[styles.paginaTitulo, desktopWeb && styles.paginaTituloWeb]}>
-              {cabecalho.titulo}
-            </Text>
-            <Text style={styles.paginaDescricao}>{cabecalho.descricao}</Text>
-          </View>
-          {atualizando ? <Sincronizando /> : null}
+      <View style={styles.paginaCabecalho}>
+        <IconeModulo aba={aba} grande={desktopWeb} />
+        <View style={styles.paginaTituloBloco}>
+          <Text
+            style={[styles.paginaTitulo, desktopWeb && styles.paginaTituloWeb]}
+            accessibilityRole="header"
+            aria-level={1}
+          >
+            {cabecalho.titulo}
+          </Text>
+          <Text style={styles.paginaDescricao}>{cabecalho.descricao}</Text>
         </View>
-      ) : null}
+        {atualizando ? <Sincronizando /> : null}
+      </View>
 
       {erro ? <Banner tone="erro" texto={erro} onClose={() => setErro(null)} /> : null}
       {mensagem ? <Banner tone="sucesso" texto={mensagem} onClose={() => setMensagem(null)} /> : null}
@@ -801,7 +832,6 @@ export default function HomeScreen() {
           ) : null}
 
           <View style={[styles.stack, colunasInicio > 1 && styles.inicioPrincipal]}>
-            {colunasInicio > 1 && atualizando ? <Sincronizando /> : null}
             {me?.statusAdmissao === 'PRE_ADMISSAO' ? (
               <Aviso
                 titulo="Conclua sua pré-admissão"
@@ -822,7 +852,7 @@ export default function HomeScreen() {
               />
             ) : null}
 
-            <Mural notificacoes={notificacoes} onAbrirNotificacao={abrirNotificacao} />
+            <Mural notificacoes={notificacoes} onAbrirNotificacao={abrirNotificacao} atalhos={atalhosRh} />
 
             {!isAdmin ? (
               <AvaliacoesInicioSection
@@ -835,7 +865,7 @@ export default function HomeScreen() {
             ) : null}
           </View>
 
-          {colunasInicio === 3 ? (
+          {colunasInicio === 3 && lateralInicio ? (
             <View style={[styles.stack, styles.inicioLateral]}>{lateralInicio}</View>
           ) : null}
 
@@ -1112,6 +1142,7 @@ export default function HomeScreen() {
   const rolagem = (
     <ScrollView
       key={aba}
+      role="main"
       style={styles.rolagem}
       contentContainerStyle={[
         styles.conteudo,
@@ -1126,6 +1157,9 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <Head>
+        <title>{`${cabecalho.curto} · Conformia`}</title>
+      </Head>
       {barraTopo ? (
         <View style={styles.shellColuna}>
           <Brilho variante="pagina" style={styles.luzPagina} />
@@ -1135,6 +1169,7 @@ export default function HomeScreen() {
             pendencias={notificacoes.length}
             me={me}
             onNavegar={abrirAba}
+            contaAberta={contaAberta}
             onConta={() => setContaAberta(true)}
           />
           {rolagem}
@@ -1143,6 +1178,10 @@ export default function HomeScreen() {
             me={me}
             larguraJanela={width}
             onFechar={() => setContaAberta(false)}
+            onAlterarSenha={() => {
+              setContaAberta(false);
+              setSenhaAberta(true);
+            }}
             onSair={sair}
           />
         </View>
@@ -1152,7 +1191,7 @@ export default function HomeScreen() {
           <BarraSuperior me={me} titulo={cabecalho.curto} onConta={() => setContaAberta(true)} />
           {rolagem}
           <NavegacaoInferior
-            itens={navegacao}
+            itens={navegacaoMobile}
             ativa={aba}
             pendencias={notificacoes.length}
             onNavegar={abrirAba}
@@ -1163,7 +1202,7 @@ export default function HomeScreen() {
 
       <FolhaMenu
         visivel={maisAberto || (contaAberta && !barraTopo)}
-        itens={contaAberta ? [] : navegacao.slice(ITENS_BARRA_INFERIOR)}
+        itens={contaAberta ? [] : navegacaoMobile.slice(ITENS_BARRA_INFERIOR)}
         ativa={aba}
         me={me}
         onNavegar={(id) => {
@@ -1175,7 +1214,18 @@ export default function HomeScreen() {
           setMaisAberto(false);
           setContaAberta(false);
         }}
+        onAlterarSenha={() => {
+          setMaisAberto(false);
+          setContaAberta(false);
+          setSenhaAberta(true);
+        }}
         onSair={sair}
+      />
+
+      <AlterarSenhaModal
+        visivel={senhaAberta}
+        onFechar={() => setSenhaAberta(false)}
+        onSucesso={setMensagem}
       />
 
       <TrocaSenhaObrigatoriaModal
@@ -1370,7 +1420,7 @@ async function carregarSolicitacoesRh(
             funcionarioId: funcionario.id,
             funcionarioNome: funcionario.nome,
             titulo: 'Novo atestado para análise',
-            descricao: `${formatarData(atestado.dataInicio)} até ${formatarData(atestado.dataFim)}`,
+            descricao: descricaoPeriodo(atestado.dataInicio, atestado.dataFim),
             criadoEm: atestado.criadoEm,
             secao: 'jornada',
           })),
@@ -1391,6 +1441,17 @@ async function carregarSolicitacoesRh(
   return [...resultados.flat(), ...admissoes].sort(
     (a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime(),
   );
+}
+
+/** Período curto e sem cortes: "05/06/2026 (1 dia)" ou "05/06/2026 a 07/06/2026 (3 dias)". */
+function descricaoPeriodo(inicio: string, fim: string): string {
+  const dias = Math.round((new Date(fim).getTime() - new Date(inicio).getTime()) / 86_400_000) + 1;
+  if (!Number.isFinite(dias) || dias < 1) {
+    return `${formatarData(inicio)} até ${formatarData(fim)}`;
+  }
+  return dias === 1
+    ? `${formatarData(inicio)} (1 dia)`
+    : `${formatarData(inicio)} a ${formatarData(fim)} (${dias} dias)`;
 }
 
 async function carregarNotificacoesLidas(funcionarioId: number): Promise<string[]> {
@@ -1601,6 +1662,7 @@ function BarraTopo({
   pendencias,
   me,
   onNavegar,
+  contaAberta,
   onConta,
 }: {
   itens: ItemNavegacao[];
@@ -1608,13 +1670,14 @@ function BarraTopo({
   pendencias: number;
   me: FuncionarioResponse | null;
   onNavegar: (id: Aba) => void;
+  contaAberta: boolean;
   onConta: () => void;
 }) {
   const { width } = useWindowDimensions();
   // Com muitos itens (perfil de RH), o nome da marca sai em telas médias para o menu caber.
   const mostrarNome = width >= 1200 || itens.length <= 6;
   return (
-    <View style={styles.topo}>
+    <View style={styles.topo} role="banner">
       <View style={styles.topoInterno}>
         <View style={styles.topoMarca}>
           <AlternarTema />
@@ -1637,7 +1700,7 @@ function BarraTopo({
                 key={item.id}
                 onPress={() => onNavegar(item.id)}
                 accessibilityRole="link"
-                accessibilityState={{ selected: ativo }}
+                aria-current={ativo ? 'page' : undefined}
                 style={(estado) => [
                   styles.topoItem,
                   (estado as { hovered?: boolean }).hovered && !ativo && styles.topoItemHover,
@@ -1658,6 +1721,7 @@ function BarraTopo({
           onPress={onConta}
           accessibilityRole="button"
           accessibilityLabel="Abrir menu da conta"
+          aria-expanded={contaAberta}
           style={(estado) => [
             styles.topoConta,
             (estado as { hovered?: boolean }).hovered && styles.topoItemHover,
@@ -1676,12 +1740,14 @@ function MenuConta({
   me,
   larguraJanela,
   onFechar,
+  onAlterarSenha,
   onSair,
 }: {
   visivel: boolean;
   me: FuncionarioResponse | null;
   larguraJanela: number;
   onFechar: () => void;
+  onAlterarSenha: () => void;
   onSair: () => void;
 }) {
   // Alinha o menu à borda direita do conteúdo centralizado.
@@ -1695,6 +1761,17 @@ function MenuConta({
           <Text style={styles.folhaPerfil} numberOfLines={1}>{me ? labelsPerfilLongo[me.perfil] : ''}</Text>
           <Text style={styles.folhaPerfil} numberOfLines={1}>{me?.email ?? ''}</Text>
         </View>
+        <Pressable
+          onPress={onAlterarSenha}
+          style={(estado) => [
+            styles.folhaItem,
+            ((estado as { hovered?: boolean }).hovered || estado.pressed) && styles.folhaItemAtivo,
+          ]}
+          accessibilityRole="button"
+        >
+          <KeyRound color={color.inkSoft} size={18} strokeWidth={1.9} />
+          <Text style={styles.folhaItemTexto}>Alterar senha</Text>
+        </Pressable>
         <Pressable
           onPress={onSair}
           style={(estado) => [
@@ -1712,17 +1789,25 @@ function MenuConta({
 }
 
 function PerfilCard({ me }: { me: FuncionarioResponse | null }) {
-  const linhas: { Icone: typeof Home; texto: string; rotulo: string }[] = [
-    { Icone: BriefcaseBusiness, texto: me?.cargoNome ?? 'Cargo não informado', rotulo: 'Cargo' },
-    { Icone: Network, texto: me?.departamentoNome ?? 'Sem departamento', rotulo: 'Departamento' },
-    { Icone: UserRound, texto: me?.gestorNome ? `Líder: ${me.gestorNome}` : 'Sem líder direto', rotulo: 'Líder direto' },
-    { Icone: Mail, texto: me?.email ?? '-', rotulo: 'E-mail' },
+  const linhasCompletas: { Icone: typeof Home; texto: string; rotulo: string; vazia: boolean }[] = [
+    { Icone: BriefcaseBusiness, texto: me?.cargoNome ?? 'Cargo não informado', rotulo: 'Cargo', vazia: !me?.cargoNome },
+    { Icone: Network, texto: me?.departamentoNome ?? 'Sem departamento', rotulo: 'Departamento', vazia: !me?.departamentoNome },
+    {
+      Icone: UserRound,
+      texto: me?.gestorNome ? `Líder: ${me.gestorNome}` : 'Sem líder direto',
+      rotulo: 'Líder direto',
+      vazia: !me?.gestorNome,
+    },
+    { Icone: Mail, texto: me?.email ?? '-', rotulo: 'E-mail', vazia: false },
     {
       Icone: CalendarDays,
       texto: me?.dataAdmissao ? `Desde ${formatarData(me.dataAdmissao)}` : 'Admissão não informada',
       rotulo: 'Data de admissão',
+      vazia: !me?.dataAdmissao,
     },
   ];
+  // A conta administrativa não tem cargo, departamento, líder nem admissão: não lista o que não existe.
+  const linhas = me?.perfil === 'ADMIN' ? linhasCompletas.filter((linha) => !linha.vazia) : linhasCompletas;
   return (
     <View style={styles.perfilCard}>
       <View style={styles.perfilTopo}>
@@ -1738,7 +1823,6 @@ function PerfilCard({ me }: { me: FuncionarioResponse | null }) {
           </View>
         ) : null}
         <Text style={styles.perfilNome}>{me?.nome ?? 'Usuário'}</Text>
-        <Text style={styles.perfilData}>{dataPorExtenso()}</Text>
       </View>
       <View style={styles.perfilLista}>
         {linhas.map(({ Icone, texto, rotulo }) => (
@@ -1781,7 +1865,7 @@ function BarraSuperior({
   onConta: () => void;
 }) {
   return (
-    <View style={styles.barraSuperior}>
+    <View style={styles.barraSuperior} role="banner">
       <View style={styles.barraMarca}>
         <AlternarTema />
         <View style={styles.barraSelo}>
@@ -1833,12 +1917,20 @@ function NavegacaoInferior({
             onPress={() => onNavegar(item.id)}
             style={styles.barraInferiorItem}
             accessibilityRole="tab"
-            accessibilityState={{ selected: ativo }}
-            accessibilityLabel={item.label}
+            aria-selected={ativo}
+            accessibilityLabel={
+              item.id === 'inicio' && pendencias > 0
+                ? `${item.label}, ${pendencias} ${pendencias === 1 ? 'pendência' : 'pendências'}`
+                : item.label
+            }
           >
             <View style={[styles.barraInferiorIcone, ativo && styles.barraInferiorIconeAtivo]}>
               <Icone color={ativo ? color.brandStrong : color.muted} size={22} strokeWidth={ativo ? 2.2 : 1.8} />
-              {item.id === 'inicio' && pendencias > 0 ? <View style={styles.pontoAviso} /> : null}
+              {item.id === 'inicio' && pendencias > 0 ? (
+                <View style={styles.contadorSobreIcone}>
+                  <Contador valor={pendencias} />
+                </View>
+              ) : null}
             </View>
             <Text
               style={[styles.barraInferiorTexto, ativo && styles.barraInferiorTextoAtivo]}
@@ -1854,7 +1946,7 @@ function NavegacaoInferior({
           onPress={onMais}
           style={styles.barraInferiorItem}
           accessibilityRole="tab"
-          accessibilityState={{ selected: maisAtivo }}
+          aria-selected={maisAtivo}
           accessibilityLabel="Mais opções"
         >
           <View style={[styles.barraInferiorIcone, maisAtivo && styles.barraInferiorIconeAtivo]}>
@@ -1876,6 +1968,7 @@ function FolhaMenu({
   me,
   onNavegar,
   onFechar,
+  onAlterarSenha,
   onSair,
 }: {
   visivel: boolean;
@@ -1884,6 +1977,7 @@ function FolhaMenu({
   me: FuncionarioResponse | null;
   onNavegar: (id: Aba) => void;
   onFechar: () => void;
+  onAlterarSenha: () => void;
   onSair: () => void;
 }) {
   return (
@@ -1917,6 +2011,14 @@ function FolhaMenu({
           );
         })}
         <Pressable
+          onPress={onAlterarSenha}
+          style={({ pressed }) => [styles.folhaItem, pressed && styles.folhaItemAtivo]}
+          accessibilityRole="button"
+        >
+          <KeyRound color={color.inkSoft} size={20} strokeWidth={1.9} />
+          <Text style={styles.folhaItemTexto}>Alterar senha</Text>
+        </Pressable>
+        <Pressable
           onPress={onSair}
           style={({ pressed }) => [styles.folhaItem, pressed && styles.folhaItemAtivo]}
           accessibilityRole="button"
@@ -1929,13 +2031,20 @@ function FolhaMenu({
   );
 }
 
+type AtalhoMural = { rotulo: string; valor: number; onPress: () => void };
+
 function Mural({
   notificacoes,
   onAbrirNotificacao,
+  atalhos,
 }: {
   notificacoes: NotificacaoMural[];
   onAbrirNotificacao: (notificacao: NotificacaoMural) => void;
+  atalhos?: AtalhoMural[];
 }) {
+  const { width } = useWindowDimensions();
+  // Em tela larga cada pendência de colaborador mostra a ação; no celular a linha inteira já é o toque.
+  const mostrarAcao = width >= 720;
   return (
     <Section
       title="Pendências e novidades"
@@ -1943,6 +2052,29 @@ function Mural({
         ? `${notificacoes.length} ${notificacoes.length === 1 ? 'item precisa' : 'itens precisam'} da sua atenção`
         : undefined}
     >
+      {atalhos ? (
+        <View style={styles.atalhos} accessibilityRole="toolbar" accessibilityLabel="Atalhos para as pendências">
+          {atalhos.map((atalho) => (
+            <Pressable
+              key={atalho.rotulo}
+              onPress={atalho.onPress}
+              disabled={atalho.valor === 0}
+              style={(estado) => [
+                styles.atalho,
+                atalho.valor === 0 && styles.atalhoZerado,
+                ((estado as { hovered?: boolean }).hovered || estado.pressed) && atalho.valor > 0 && styles.atalhoHover,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel={`${atalho.rotulo}: ${atalho.valor} ${atalho.valor === 1 ? 'pendente' : 'pendentes'}`}
+            >
+              <Text style={[styles.atalhoTexto, atalho.valor === 0 && styles.atalhoTextoZerado]}>
+                {atalho.rotulo}
+              </Text>
+              {atalho.valor > 0 ? <Contador valor={atalho.valor} /> : null}
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
       {notificacoes.length ? (
         <View>
           {notificacoes.map((notificacao, indice) => (
@@ -1960,8 +2092,11 @@ function Mural({
               <IconeModulo aba={notificacao.aba} pequeno />
               <View style={styles.notificacaoConteudo}>
                 <Text style={styles.notificacaoTitulo}>{notificacao.titulo}</Text>
-                <Text style={styles.notificacaoDescricao} numberOfLines={2}>{notificacao.descricao}</Text>
+                <Text style={styles.notificacaoDescricao} numberOfLines={3}>{notificacao.descricao}</Text>
               </View>
+              {mostrarAcao && notificacao.funcionarioId ? (
+                <Text style={styles.notificacaoAcao}>Analisar</Text>
+              ) : null}
               <Text style={styles.notificacaoData}>{formatarData(notificacao.criadoEm)}</Text>
               <ChevronRight color={color.placeholder} size={18} strokeWidth={2} />
             </Pressable>
@@ -2045,7 +2180,7 @@ function Section({
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
         <View style={styles.flex1}>
-          <Text style={styles.sectionTitle} accessibilityRole="header">{title}</Text>
+          <Text style={styles.sectionTitle} accessibilityRole="header" aria-level={2}>{title}</Text>
           {subtitle ? <Text style={styles.sectionSubtitle}>{subtitle}</Text> : null}
         </View>
         {action}
@@ -2198,6 +2333,23 @@ function formatarCpf(valor: string): string {
 
 function SenhaSection({ onSucesso }: { onSucesso: (texto: string) => void }) {
   const [aberto, setAberto] = useState(false);
+  return (
+    <Section title="Senha" subtitle="A senha que você usa para entrar no Conformia">
+      <ActionButton label="Alterar senha" onPress={() => setAberto(true)} tone="ghost" />
+      <AlterarSenhaModal visivel={aberto} onFechar={() => setAberto(false)} onSucesso={onSucesso} />
+    </Section>
+  );
+}
+
+function AlterarSenhaModal({
+  visivel,
+  onFechar,
+  onSucesso,
+}: {
+  visivel: boolean;
+  onFechar: () => void;
+  onSucesso: (texto: string) => void;
+}) {
   const [atual, setAtual] = useState('');
   const [nova, setNova] = useState('');
   const [erroSenha, setErroSenha] = useState<string | null>(null);
@@ -2209,7 +2361,7 @@ function SenhaSection({ onSucesso }: { onSucesso: (texto: string) => void }) {
     }
     try {
       await api.put('/api/funcionarios/me/senha', { senhaAtual: atual, novaSenha: nova });
-      setAberto(false);
+      onFechar();
       setAtual('');
       setNova('');
       setErroSenha(null);
@@ -2220,25 +2372,22 @@ function SenhaSection({ onSucesso }: { onSucesso: (texto: string) => void }) {
   }
 
   return (
-      <Section title="Senha" subtitle="A senha que você usa para entrar no Conformia">
-      <ActionButton label="Alterar senha" onPress={() => setAberto(true)} tone="ghost" />
-      <Modal visible={aberto} transparent animationType="fade" onRequestClose={() => setAberto(false)}>
-        <View style={senhaStyles.overlay}>
-          <View style={senhaStyles.modal}>
-            <Text style={senhaStyles.title}>Alterar senha</Text>
-            {erroSenha ? <Text style={senhaStyles.error}>{erroSenha}</Text> : null}
-            <TextInput style={senhaStyles.input} value={atual} onChangeText={setAtual}
-              secureTextEntry placeholder="Senha atual" placeholderTextColor={color.placeholder} />
-            <TextInput style={senhaStyles.input} value={nova} onChangeText={setNova}
-              secureTextEntry placeholder="Nova senha, mínimo de 6 caracteres" placeholderTextColor={color.placeholder} />
-            <View style={senhaStyles.actions}>
-              <ActionButton label="Cancelar" onPress={() => setAberto(false)} tone="ghost" />
-              <ActionButton label="Alterar" onPress={alterar} tone="primary" />
-            </View>
+    <Modal visible={visivel} transparent animationType="fade" onRequestClose={onFechar}>
+      <View style={senhaStyles.overlay}>
+        <View style={senhaStyles.modal}>
+          <Text style={senhaStyles.title}>Alterar senha</Text>
+          {erroSenha ? <Text style={senhaStyles.error}>{erroSenha}</Text> : null}
+          <TextInput style={senhaStyles.input} value={atual} onChangeText={setAtual}
+            secureTextEntry placeholder="Senha atual" placeholderTextColor={color.placeholder} />
+          <TextInput style={senhaStyles.input} value={nova} onChangeText={setNova}
+            secureTextEntry placeholder="Nova senha, mínimo de 6 caracteres" placeholderTextColor={color.placeholder} />
+          <View style={senhaStyles.actions}>
+            <ActionButton label="Cancelar" onPress={onFechar} tone="ghost" />
+            <ActionButton label="Alterar" onPress={alterar} tone="primary" />
           </View>
         </View>
-      </Modal>
-    </Section>
+      </View>
+    </Modal>
   );
 }
 
@@ -2732,7 +2881,7 @@ const styles = estilos(() => ({
     backgroundColor: color.navTrack,
   },
   topoItem: {
-    height: 34,
+    height: 40,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -2838,10 +2987,6 @@ const styles = estilos(() => ({
     fontWeight: '600',
     textAlign: 'center',
   },
-  perfilData: {
-    color: color.muted,
-    ...type.small,
-  },
   perfilLista: {
     paddingHorizontal: 20,
     paddingVertical: 14,
@@ -2857,6 +3002,44 @@ const styles = estilos(() => ({
     minWidth: 0,
     color: color.inkSoft,
     ...type.small,
+  },
+  notificacaoAcao: {
+    color: color.brand,
+    ...type.small,
+    fontWeight: '600',
+  },
+  atalhos: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  atalho: {
+    minHeight: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: color.lineStrong,
+    backgroundColor: color.surface,
+  },
+  atalhoHover: {
+    backgroundColor: color.sunken,
+  },
+  atalhoZerado: {
+    backgroundColor: color.sunken,
+    borderColor: color.line,
+  },
+  atalhoTexto: {
+    color: color.ink,
+    ...type.small,
+    fontWeight: '600',
+  },
+  atalhoTextoZerado: {
+    color: color.muted,
+    fontWeight: '500',
   },
   contador: {
     minWidth: 22,
@@ -2972,16 +3155,11 @@ const styles = estilos(() => ({
     color: color.brandStrong,
     fontWeight: '600',
   },
-  pontoAviso: {
+  // Âmbar é a cor de atenção do sistema; o número diz quantas pendências há.
+  contadorSobreIcone: {
     position: 'absolute',
-    top: -1,
-    right: -3,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: color.dangerStrong,
-    borderWidth: 1.5,
-    borderColor: color.surface,
+    top: -8,
+    right: -14,
   },
   folhaFundo: {
     flex: 1,

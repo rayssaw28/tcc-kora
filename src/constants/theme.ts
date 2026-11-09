@@ -14,9 +14,9 @@ const paletaClara = {
   inkSoft: '#2F3D37',
   text: '#46544D',
   muted: '#5B6862',
-  placeholder: '#8A9690',
+  placeholder: '#687570',
   line: '#E3E8E5',
-  lineStrong: '#C9D2CD',
+  lineStrong: '#7F8C86',
   canvas: '#F1F4F2',
   surface: '#FFFFFF',
   sunken: '#EBF0ED',
@@ -37,9 +37,6 @@ const paletaClara = {
   navActive: '#FFFFFF',
   onHeader: '#14201B',
   onHeaderMuted: '#5B6862',
-
-  // Painéis escuros (login): neutro quase preto, a cor vem da iluminação
-  noite: '#111816',
 
   // Acento de atenção (10%)
   accent: '#FFB224',
@@ -70,9 +67,9 @@ const paletaEscura: Paleta = {
   inkSoft: '#CBD5D0',
   text: '#AEBAB4',
   muted: '#93A09A',
-  placeholder: '#68756F',
+  placeholder: '#8A9893',
   line: '#26302C',
-  lineStrong: '#36433D',
+  lineStrong: '#627369',
   canvas: '#0D1311',
   surface: '#151C19',
   sunken: '#1C2521',
@@ -92,8 +89,6 @@ const paletaEscura: Paleta = {
   navActive: '#26322D',
   onHeader: '#E8EEEB',
   onHeaderMuted: '#9AA7A1',
-
-  noite: '#0A0F0D',
 
   accent: '#FFB224',
   onAccent: '#3A2500',

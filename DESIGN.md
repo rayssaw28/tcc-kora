@@ -6,9 +6,9 @@ colors:
   ink-soft: "#2F3D37"
   text: "#46544D"
   muted: "#5B6862"
-  placeholder: "#8A9690"
+  placeholder: "#687570"
   line: "#E3E8E5"
-  line-strong: "#C9D2CD"
+  line-strong: "#7F8C86"
   canvas: "#F1F4F2"
   surface: "#FFFFFF"
   sunken: "#EBF0ED"
@@ -18,7 +18,6 @@ colors:
   brand-soft: "#E3F3EB"
   brand-line: "#BFDCCD"
   on-brand: "#FFFFFF"
-  night: "#111816"
   accent: "#FFB224"
   on-accent: "#3A2500"
   info: "#1D4ED8"
@@ -160,10 +159,9 @@ Paleta de neutros verdes-acinzentados com um verde-floresta de marca; o resto do
 - **Âmbar de Atenção** (#FFB224): contadores de pendências e o ícone do modo escuro. Texto sobre ele: #3A2500.
 
 ### Neutral
-- **Tinta** (#14201B): títulos e valores. **Tinta Suave** (#2F3D37): rótulos e texto de botão secundário. **Texto** (#46544D): corpo de linhas. **Apagado** (#5B6862): metadados. **Marcador** (#8A9690): placeholder.
+- **Tinta** (#14201B): títulos e valores. **Tinta Suave** (#2F3D37): rótulos e texto de botão secundário. **Texto** (#46544D): corpo de linhas. **Apagado** (#5B6862): metadados. **Marcador** (#687570): placeholder.
 - **Papel** (#F1F4F2): fundo da página. **Superfície** (#FFFFFF): cartões, campos e modais. **Rebaixado** (#EBF0ED): trilhos de abas e selos neutros.
-- **Linha** (#E3E8E5) e **Linha Forte** (#C9D2CD): divisores e contorno de campos e botões secundários.
-- **Noite** (#111816): painel lateral escuro do login.
+- **Linha** (#E3E8E5) e **Linha Forte** (#7F8C86): divisores e contorno de campos e botões secundários. A Linha Forte chega a 3:1 sobre branco, papel e rebaixado (WCAG 1.4.11), porque a borda é o que delimita o controle.
 
 ### Status
 - **Perigo** (#A8322A, forte #C0362C, névoa #FBEFED), **Aviso** (#8F5A0B, névoa #FBF0D9) e **Info** (#1D4ED8, névoa #E6EEFD). Sempre em par: texto escuro sobre fundo suave.
@@ -174,7 +172,7 @@ Dez tons (verde, azul, violeta, laranja, teal, rosa, índigo, ciano, âmbar, ard
 ### Named Rules
 **The One Voice Rule.** O verde da marca ocupa pouco de cada tela. Se tudo é verde, nada indica a ação.
 **The Paired Status Rule.** Todo estado de status usa o par texto escuro sobre fundo suave. Nunca cor chapada com texto branco, exceto botão de perigo.
-**The Fixed-Dark Panel Rule.** Painéis que são escuros nos dois modos (como o painel lateral do login) usam texto branco fixo. Os tokens `on-brand` invertem no modo escuro e deixariam o texto invisível ali.
+**The Tinted Panel Rule.** O painel lateral do login é Verde Névoa com o brilho claro por trás, nos dois modos, e o texto sobre ele usa os mesmos tokens de tinta do resto do app (`ink`, `muted`). Nunca cores fixas, nunca `on-brand`.
 
 ## Typography
 
@@ -261,7 +259,7 @@ Cantos suaves e consistentes: 8px para botões e campos, 12px para cartões e mo
 - **Do** reservar o Verde Floresta a ações principais, links e estados ativos.
 - **Do** usar o par texto escuro sobre fundo suave para todo status.
 - **Do** manter os dois modos em cada tela e conferir contraste de texto de 4,5:1 nos dois.
-- **Do** usar texto branco fixo sobre painéis que são escuros nos dois modos.
+- **Do** usar os tokens de tinta também sobre o painel do login, que é verde-névoa e não escuro.
 - **Do** rotular botões de ação de cabeçalho com texto, nunca só "+".
 - **Do** usar apenas os sete tamanhos de fonte e a escala de espaçamento de 4 a 32px.
 

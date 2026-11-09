@@ -44,26 +44,25 @@ export function alternarModo(): void {
 }
 
 /** Botão redondo que alterna entre modo claro e escuro. */
-export function AlternarTema({ style, sobreEscuro = false }: { style?: StyleProp<ViewStyle>; sobreEscuro?: boolean }) {
+export function AlternarTema({ style }: { style?: StyleProp<ViewStyle> }) {
   const escuro = useModo() === 'escuro';
   const Icone = escuro ? Sun : Moon;
   return (
     <Pressable
       onPress={alternarModo}
       accessibilityRole="switch"
-      accessibilityState={{ checked: escuro }}
+      aria-checked={escuro}
       accessibilityLabel="Modo escuro"
       accessibilityHint={escuro ? 'Volta para o modo claro' : 'Ativa o modo escuro'}
-      hitSlop={6}
+      hitSlop={8}
       style={(estado) => [
         styles.botao,
-        sobreEscuro && styles.botaoSobreEscuro,
-        ((estado as { hovered?: boolean }).hovered || estado.pressed) && (sobreEscuro ? styles.botaoSobreEscuroHover : styles.botaoHover),
+        ((estado as { hovered?: boolean }).hovered || estado.pressed) && styles.botaoHover,
         style,
       ]}
     >
       <Icone
-        color={sobreEscuro ? '#FFFFFF' : escuro ? color.accent : color.inkSoft}
+        color={escuro ? color.accent : color.inkSoft}
         size={17}
         strokeWidth={2}
       />
@@ -85,12 +84,5 @@ const styles = estilos(() => ({
   botaoHover: {
     backgroundColor: color.navHover,
     borderColor: color.lineStrong,
-  },
-  botaoSobreEscuro: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderColor: 'rgba(255,255,255,0.14)',
-  },
-  botaoSobreEscuroHover: {
-    backgroundColor: 'rgba(255,255,255,0.16)',
   },
 }));

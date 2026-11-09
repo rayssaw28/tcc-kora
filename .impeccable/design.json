@@ -5,7 +5,7 @@
   "extensions": {
     "colorMeta": {
       "brand": { "role": "primary", "displayName": "Verde Floresta", "canonical": "#0E684E", "tonalRamp": ["#05261D", "#0A3F30", "#0E684E", "#2E8C70", "#5FB095", "#9ACDB9", "#CBE5DA", "#EAF5F0"] },
-      "ink": { "role": "neutral", "displayName": "Tinta", "canonical": "#14201B", "tonalRamp": ["#14201B", "#2F3D37", "#46544D", "#5B6862", "#8A9690", "#C9D2CD", "#E3E8E5", "#F1F4F2"] },
+      "ink": { "role": "neutral", "displayName": "Tinta", "canonical": "#14201B", "tonalRamp": ["#14201B", "#2F3D37", "#46544D", "#5B6862", "#687570", "#C9D2CD", "#E3E8E5", "#F1F4F2"] },
       "accent": { "role": "secondary", "displayName": "Âmbar de Atenção", "canonical": "#FFB224", "tonalRamp": ["#3A2500", "#6B4500", "#9E6600", "#D18400", "#FFB224", "#FFC95C", "#FFE0A0", "#FFF2D6"] },
       "danger": { "role": "status", "displayName": "Perigo", "canonical": "#A8322A", "tonalRamp": ["#3B0F0B", "#6B1E18", "#A8322A", "#C0362C", "#DC6A60", "#EA9C94", "#F2C9C4", "#FBEFED"] },
       "info": { "role": "status", "displayName": "Info", "canonical": "#1D4ED8", "tonalRamp": ["#0F2A7A", "#1739A5", "#1D4ED8", "#4574E5", "#7A9BEE", "#A9C0F3", "#C3D5F8", "#E6EEFD"] }
@@ -48,7 +48,7 @@
       "refersTo": "button-secondary",
       "description": "Ação de apoio, com contorno.",
       "html": "<button class=\"ds-btn-secondary\">Adicionar</button>",
-      "css": ".ds-btn-secondary{background:#fff;color:#14201B;min-height:32px;padding:6px 12px;border:1px solid #C9D2CD;border-radius:8px;font:600 13px/19px Archivo,system-ui,sans-serif;cursor:pointer}.ds-btn-secondary:hover{background:#EBF0ED}.ds-btn-secondary:focus-visible{outline:2px solid #0E684E;outline-offset:2px}"
+      "css": ".ds-btn-secondary{background:#fff;color:#14201B;min-height:32px;padding:6px 12px;border:1px solid #7F8C86;border-radius:8px;font:600 13px/19px Archivo,system-ui,sans-serif;cursor:pointer}.ds-btn-secondary:hover{background:#EBF0ED}.ds-btn-secondary:focus-visible{outline:2px solid #0E684E;outline-offset:2px}"
     },
     {
       "name": "Campo de texto",
@@ -56,7 +56,7 @@
       "refersTo": "input",
       "description": "Campo de formulário com rótulo acima.",
       "html": "<label class=\"ds-label\">E-mail corporativo<input class=\"ds-input\" placeholder=\"nome@empresa.com.br\"></label>",
-      "css": ".ds-label{display:grid;gap:6px;color:#2F3D37;font:500 13px/19px Archivo,system-ui,sans-serif}.ds-input{min-height:44px;padding:10px 12px;border:1px solid #C9D2CD;border-radius:8px;background:#fff;color:#14201B;font:400 15px/22px Archivo,system-ui,sans-serif}.ds-input::placeholder{color:#8A9690}.ds-input:focus{outline:none;border-color:#0E684E}"
+      "css": ".ds-label{display:grid;gap:6px;color:#2F3D37;font:500 13px/19px Archivo,system-ui,sans-serif}.ds-input{min-height:44px;padding:10px 12px;border:1px solid #7F8C86;border-radius:8px;background:#fff;color:#14201B;font:400 15px/22px Archivo,system-ui,sans-serif}.ds-input::placeholder{color:#687570}.ds-input:focus{outline:none;border-color:#0E684E}"
     },
     {
       "name": "Cartão de seção",
@@ -72,7 +72,7 @@
       "refersTo": "chip",
       "description": "Filtro de seleção; o ativo usa verde suave.",
       "html": "<div class=\"ds-chips\"><button class=\"ds-chip\">Todos</button><button class=\"ds-chip ds-chip-on\">Pendentes</button></div>",
-      "css": ".ds-chips{display:flex;gap:6px}.ds-chip{min-height:32px;padding:5px 12px;border:1px solid #C9D2CD;border-radius:999px;background:#fff;color:#2F3D37;font:500 13px/19px Archivo,system-ui,sans-serif;cursor:pointer}.ds-chip-on{background:#E3F3EB;border-color:#0E684E;color:#0A5139;font-weight:600}.ds-chip:focus-visible{outline:2px solid #0E684E;outline-offset:2px}"
+      "css": ".ds-chips{display:flex;gap:6px}.ds-chip{min-height:32px;padding:5px 12px;border:1px solid #7F8C86;border-radius:999px;background:#fff;color:#2F3D37;font:500 13px/19px Archivo,system-ui,sans-serif;cursor:pointer}.ds-chip-on{background:#E3F3EB;border-color:#0E684E;color:#0A5139;font-weight:600}.ds-chip:focus-visible{outline:2px solid #0E684E;outline-offset:2px}"
     },
     {
       "name": "Abas segmentadas",
@@ -96,7 +96,7 @@
     "rules": [
       { "name": "The One Voice Rule", "body": "O verde da marca ocupa pouco de cada tela. Se tudo é verde, nada indica a ação.", "section": "colors" },
       { "name": "The Paired Status Rule", "body": "Todo estado de status usa o par texto escuro sobre fundo suave. Nunca cor chapada com texto branco, exceto botão de perigo.", "section": "colors" },
-      { "name": "The Fixed-Dark Panel Rule", "body": "Painéis que são escuros nos dois modos (como o painel lateral do login) usam texto branco fixo. Os tokens on-brand invertem no modo escuro e deixariam o texto invisível ali.", "section": "colors" },
+      { "name": "The Tinted Panel Rule", "body": "O painel lateral do login é Verde Névoa com o brilho claro por trás, nos dois modos, e o texto sobre ele usa os mesmos tokens de tinta do resto do app (ink, muted). Nunca cores fixas, nunca on-brand.", "section": "colors" },
       { "name": "The Seven Sizes Rule", "body": "Só existem 12, 13, 15, 17, 20, 24 e 30. Tamanhos legados são encaixados no degrau mais próximo (responsiveFontSize).", "section": "typography" },
       { "name": "The No Nested Card Rule", "body": "Hierarquia é seção (cartão) mais linhas com divisor. Nunca um cartão dentro de outro.", "section": "layout" },
       { "name": "The Quiet Shadow Rule", "body": "Em repouso, só o cartão tem sombra, e ela é quase imperceptível. A sombra funda é para o que flutua.", "section": "elevation" }
@@ -105,7 +105,7 @@
       "Do reservar o Verde Floresta a ações principais, links e estados ativos.",
       "Do usar o par texto escuro sobre fundo suave para todo status.",
       "Do manter os dois modos em cada tela e conferir contraste de texto de 4,5:1 nos dois.",
-      "Do usar texto branco fixo sobre painéis que são escuros nos dois modos.",
+      "Do usar os tokens de tinta também sobre o painel do login, que é verde-névoa e não escuro.",
       "Do rotular botões de ação de cabeçalho com texto, nunca só \"+\".",
       "Do usar apenas os sete tamanhos de fonte e a escala de espaçamento de 4 a 32px."
     ],

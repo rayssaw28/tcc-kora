@@ -2,7 +2,7 @@
   --font-ui: Archivo, ui-sans-serif, system-ui, sans-serif;
   --brand: #0e684e;
   --canvas: #f1f4f2;
-  --placeholder: #8a9690;
+  --placeholder: #687570;
   --scroll: #c9d2cd;
   --selecao: #ffe1a6;
 }
@@ -11,7 +11,7 @@
 :root[data-tema='escuro'] {
   --brand: #3cc793;
   --canvas: #0d1311;
-  --placeholder: #68756f;
+  --placeholder: #8a9893;
   --scroll: #36433d;
   --selecao: #5a4418;
 }
