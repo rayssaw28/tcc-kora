@@ -3,7 +3,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
@@ -20,7 +19,7 @@ import {
 } from '@/api/types';
 import { SearchInput } from '@/components/SearchInput';
 import { AddButton, ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, type } from '@/constants/theme';
 
 type Arquivo = { uri: string; name: string; type: string };
 
@@ -546,7 +545,7 @@ function formatarData(valor: string): string {
   return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   section: ui.section,
   header: ui.header,
   headerText: ui.headerText,
@@ -629,4 +628,4 @@ const styles = StyleSheet.create({
   monthSelected: { backgroundColor: color.brand, borderColor: color.brand },
   monthText: { color: color.inkSoft, ...type.small, fontWeight: '500' },
   monthTextSelected: { color: color.onBrand, fontWeight: '600' },
-});
+}));

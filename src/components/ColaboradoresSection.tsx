@@ -4,7 +4,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   useWindowDimensions,
@@ -20,7 +19,7 @@ import {
 } from '@/api/types';
 import { SearchInput } from '@/components/SearchInput';
 import { ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, tomDoNome, type } from '@/constants/theme';
 
 export type SecaoColaborador = 'dados' | 'documentos' | 'beneficios' | 'avaliacoes' | 'jornada';
 
@@ -464,8 +463,8 @@ export function ColaboradoresSection({
 function PerfilResumo({ funcionario }: { funcionario: FuncionarioResponse }) {
   return (
     <View style={styles.perfil}>
-      <View style={styles.avatarLarge}>
-        <Text style={styles.avatarLargeText}>{iniciais(funcionario.nome)}</Text>
+      <View style={[styles.avatarLarge, { backgroundColor: tomDoNome(funcionario.nome).suave }]}>
+        <Text style={[styles.avatarLargeText, { color: tomDoNome(funcionario.nome).texto }]}>{iniciais(funcionario.nome)}</Text>
       </View>
       <View style={styles.headerText}>
         <Text style={styles.perfilNome}>{funcionario.nome}</Text>
@@ -710,9 +709,10 @@ function rotuloStatus(status: FuncionarioResponse['statusAdmissao']): string {
 }
 
 function Avatar({ nome, ativo }: { nome: string; ativo: boolean }) {
+  const tom = tomDoNome(nome);
   return (
-    <View style={[styles.avatar, ativo && styles.avatarActive]}>
-      <Text style={[styles.avatarText, ativo && styles.avatarTextActive]}>{iniciais(nome)}</Text>
+    <View style={[styles.avatar, { backgroundColor: tom.suave }, ativo && styles.avatarActive]}>
+      <Text style={[styles.avatarText, { color: tom.texto }, ativo && styles.avatarTextActive]}>{iniciais(nome)}</Text>
     </View>
   );
 }
@@ -733,7 +733,7 @@ function iniciais(nome: string): string {
     .join('');
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   container: { gap: 16 },
   containerWeb: { flexDirection: 'row', alignItems: 'flex-start', gap: 20 },
   directoryWeb: { width: 340, flexShrink: 0 },
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
   avatarActive: { backgroundColor: color.brand },
   avatarLarge: { width: 48, height: 48, borderRadius: 24, backgroundColor: color.brandSoft, alignItems: 'center', justifyContent: 'center' },
   avatarLargeText: { color: color.brandStrong, ...type.lead, fontWeight: '600' },
-  avatarText: { color: color.inkSoft, ...type.small, fontWeight: '600' },
+  avatarText: { color: color.inkSoft, ...type.small, fontWeight: '700' },
   avatarTextActive: { color: color.onBrand },
   employeeText: { flex: 1, gap: 1, minWidth: 0 },
   employeeHeaderLine: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -780,7 +780,7 @@ const styles = StyleSheet.create({
   employeeStatus: { flexShrink: 0, overflow: 'hidden', borderRadius: 999, paddingHorizontal: 8, paddingVertical: 1, ...type.caption, fontWeight: '600' },
   employeeStatusOk: { color: color.brandStrong, backgroundColor: color.brandSoft },
   employeeStatusWarning: { color: color.warning, backgroundColor: color.warningSoft },
-  employeeStatusInfo: { color: color.inkSoft, backgroundColor: color.sunken },
+  employeeStatusInfo: { color: color.info, backgroundColor: color.infoSoft },
   employeeStatusDanger: { color: color.danger, backgroundColor: color.dangerSoft },
   perfil: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   perfilNome: { color: color.ink, ...type.title, fontWeight: '600' },
@@ -816,4 +816,4 @@ const styles = StyleSheet.create({
   option: { borderTopWidth: 1, borderTopColor: color.line, paddingVertical: 12, paddingHorizontal: 4 },
   optionActive: { backgroundColor: color.brandSoft },
   optionText: { color: color.ink, ...type.body },
-});
+}));

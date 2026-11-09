@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-09T12:00:00Z",
+  "title": "Design System: Conformia",
+  "extensions": {
+    "colorMeta": {
+      "brand": { "role": "primary", "displayName": "Verde Floresta", "canonical": "#0E684E", "tonalRamp": ["#05261D", "#0A3F30", "#0E684E", "#2E8C70", "#5FB095", "#9ACDB9", "#CBE5DA", "#EAF5F0"] },
+      "ink": { "role": "neutral", "displayName": "Tinta", "canonical": "#14201B", "tonalRamp": ["#14201B", "#2F3D37", "#46544D", "#5B6862", "#687570", "#C9D2CD", "#E3E8E5", "#F1F4F2"] },
+      "accent": { "role": "secondary", "displayName": "Âmbar de Atenção", "canonical": "#FFB224", "tonalRamp": ["#3A2500", "#6B4500", "#9E6600", "#D18400", "#FFB224", "#FFC95C", "#FFE0A0", "#FFF2D6"] },
+      "danger": { "role": "status", "displayName": "Perigo", "canonical": "#A8322A", "tonalRamp": ["#3B0F0B", "#6B1E18", "#A8322A", "#C0362C", "#DC6A60", "#EA9C94", "#F2C9C4", "#FBEFED"] },
+      "info": { "role": "status", "displayName": "Info", "canonical": "#1D4ED8", "tonalRamp": ["#0F2A7A", "#1739A5", "#1D4ED8", "#4574E5", "#7A9BEE", "#A9C0F3", "#C3D5F8", "#E6EEFD"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Frase de abertura do painel de login." },
+      "headline": { "displayName": "Headline", "purpose": "Títulos de página e da tela de login." },
+      "title": { "displayName": "Title", "purpose": "Títulos de modal." },
+      "lead": { "displayName": "Lead", "purpose": "Títulos de seção e nome da marca." },
+      "body": { "displayName": "Body", "purpose": "Texto de campos, valores e botões." },
+      "label": { "displayName": "Label", "purpose": "Rótulos de campo e metadados." },
+      "caption": { "displayName": "Caption", "purpose": "Texto de selos." }
+    },
+    "shadows": [
+      { "name": "cartao", "value": "0 2px 12px rgba(11,59,45,0.06)", "purpose": "Cartão de seção em repouso." },
+      { "name": "barra", "value": "0 4px 16px rgba(20,32,27,0.05)", "purpose": "Cabeçalho fixo." },
+      { "name": "pilula", "value": "0 1px 6px rgba(20,32,27,0.10)", "purpose": "Aba ativa em controle segmentado." },
+      { "name": "flutuante", "value": "0 8px 24px rgba(11,59,45,0.14)", "purpose": "Modais e menus." }
+    ],
+    "motion": [
+      { "name": "troca-de-tema", "value": "background-color 0.2s ease", "purpose": "Transição do fundo da página ao alternar claro/escuro." }
+    ],
+    "breakpoints": [
+      { "name": "desktop-web", "value": "900px" },
+      { "name": "wide-web", "value": "1180px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal da tela; um por contexto.",
+      "html": "<button class=\"ds-btn-primary\">Entrar</button>",
+      "css": ".ds-btn-primary{background:#0E684E;color:#fff;min-height:40px;padding:9px 16px;border:0;border-radius:8px;font:600 15px/22px Archivo,system-ui,sans-serif;cursor:pointer;transition:background .15s}.ds-btn-primary:hover{background:#0A5139}.ds-btn-primary:focus-visible{outline:2px solid #0E684E;outline-offset:2px}"
+    },
+    {
+      "name": "Botão secundário",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ação de apoio, com contorno.",
+      "html": "<button class=\"ds-btn-secondary\">Adicionar</button>",
+      "css": ".ds-btn-secondary{background:#fff;color:#14201B;min-height:32px;padding:6px 12px;border:1px solid #7F8C86;border-radius:8px;font:600 13px/19px Archivo,system-ui,sans-serif;cursor:pointer}.ds-btn-secondary:hover{background:#EBF0ED}.ds-btn-secondary:focus-visible{outline:2px solid #0E684E;outline-offset:2px}"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo de formulário com rótulo acima.",
+      "html": "<label class=\"ds-label\">E-mail corporativo<input class=\"ds-input\" placeholder=\"nome@empresa.com.br\"></label>",
+      "css": ".ds-label{display:grid;gap:6px;color:#2F3D37;font:500 13px/19px Archivo,system-ui,sans-serif}.ds-input{min-height:44px;padding:10px 12px;border:1px solid #7F8C86;border-radius:8px;background:#fff;color:#14201B;font:400 15px/22px Archivo,system-ui,sans-serif}.ds-input::placeholder{color:#687570}.ds-input:focus{outline:none;border-color:#0E684E}"
+    },
+    {
+      "name": "Cartão de seção",
+      "kind": "card",
+      "refersTo": "section-card",
+      "description": "Seção com título e linhas separadas por divisor.",
+      "html": "<section class=\"ds-card\"><h3 class=\"ds-card-title\">Holerites</h3><div class=\"ds-row\"><span>Outubro 2026</span><span class=\"ds-badge\">Disponível</span></div><div class=\"ds-row\"><span>Setembro 2026</span><span class=\"ds-badge\">Disponível</span></div></section>",
+      "css": ".ds-card{background:#fff;border:1px solid #E3E8E5;border-radius:12px;padding:20px;display:grid;gap:12px;box-shadow:0 2px 12px rgba(11,59,45,.06);font-family:Archivo,system-ui,sans-serif}.ds-card-title{margin:0;color:#14201B;font:600 17px/24px Archivo,system-ui,sans-serif}.ds-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #E3E8E5;color:#14201B;font:600 15px/22px Archivo,system-ui,sans-serif}.ds-badge{background:#E3F3EB;color:#0A5139;border-radius:999px;padding:3px 10px;font:600 12px/16px Archivo,system-ui,sans-serif}"
+    },
+    {
+      "name": "Chip de seleção",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Filtro de seleção; o ativo usa verde suave.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\">Todos</button><button class=\"ds-chip ds-chip-on\">Pendentes</button></div>",
+      "css": ".ds-chips{display:flex;gap:6px}.ds-chip{min-height:32px;padding:5px 12px;border:1px solid #7F8C86;border-radius:999px;background:#fff;color:#2F3D37;font:500 13px/19px Archivo,system-ui,sans-serif;cursor:pointer}.ds-chip-on{background:#E3F3EB;border-color:#0E684E;color:#0A5139;font-weight:600}.ds-chip:focus-visible{outline:2px solid #0E684E;outline-offset:2px}"
+    },
+    {
+      "name": "Abas segmentadas",
+      "kind": "nav",
+      "refersTo": "segmented",
+      "description": "Navegação entre visões da mesma tela.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-on\">Equipe</button><button>Jornada</button><button>Avaliações</button></div>",
+      "css": ".ds-seg{display:inline-flex;gap:4px;padding:4px;border-radius:10px;background:#EBF0ED}.ds-seg button{min-height:34px;padding:0 14px;border:0;border-radius:8px;background:transparent;color:#5B6862;font:500 13px/19px Archivo,system-ui,sans-serif;cursor:pointer}.ds-seg .ds-seg-on{background:#fff;color:#14201B;font-weight:600;box-shadow:0 1px 6px rgba(20,32,27,.10)}.ds-seg button:focus-visible{outline:2px solid #0E684E;outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Balcão de RH Sereno",
+    "overview": "O Conformia é a mesa de atendimento de RH feita interface: informação densa, mas calma. Os neutros ocupam quase toda a tela, as superfícies são cartões brancos de borda fina e o verde da marca aparece só onde há ação ou estado ativo. O âmbar entra raramente, e apenas no que pede atenção, como contadores de pendências. Profundidade vem de luz e sombra suaves, não de blocos de cor chapada.",
+    "keyCharacteristics": [
+      "Neutros frios com leve tom de verde; branco puro só na superfície dos cartões.",
+      "Verde reservado a ações principais e ao estado ativo; âmbar só para atenção.",
+      "Uma única família tipográfica, Archivo, em escala curta de sete tamanhos.",
+      "Cartão de seção com linhas separadas por divisores; nunca cartão dentro de cartão.",
+      "Brilhos radiais discretos como ambiente, nunca como conteúdo."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "O verde da marca ocupa pouco de cada tela. Se tudo é verde, nada indica a ação.", "section": "colors" },
+      { "name": "The Paired Status Rule", "body": "Todo estado de status usa o par texto escuro sobre fundo suave. Nunca cor chapada com texto branco, exceto botão de perigo.", "section": "colors" },
+      { "name": "The Tinted Panel Rule", "body": "O painel lateral do login é Verde Névoa com o brilho claro por trás, nos dois modos, e o texto sobre ele usa os mesmos tokens de tinta do resto do app (ink, muted). Nunca cores fixas, nunca on-brand.", "section": "colors" },
+      { "name": "The Seven Sizes Rule", "body": "Só existem 12, 13, 15, 17, 20, 24 e 30. Tamanhos legados são encaixados no degrau mais próximo (responsiveFontSize).", "section": "typography" },
+      { "name": "The No Nested Card Rule", "body": "Hierarquia é seção (cartão) mais linhas com divisor. Nunca um cartão dentro de outro.", "section": "layout" },
+      { "name": "The Quiet Shadow Rule", "body": "Em repouso, só o cartão tem sombra, e ela é quase imperceptível. A sombra funda é para o que flutua.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do reservar o Verde Floresta a ações principais, links e estados ativos.",
+      "Do usar o par texto escuro sobre fundo suave para todo status.",
+      "Do manter os dois modos em cada tela e conferir contraste de texto de 4,5:1 nos dois.",
+      "Do usar os tokens de tinta também sobre o painel do login, que é verde-névoa e não escuro.",
+      "Do rotular botões de ação de cabeçalho com texto, nunca só \"+\".",
+      "Do usar apenas os sete tamanhos de fonte e a escala de espaçamento de 4 a 32px."
+    ],
+    "donts": [
+      "Don't aninhar cartão dentro de cartão; use divisores entre linhas.",
+      "Don't usar on-brand ou on-brand-muted sobre superfícies que não sejam o próprio fundo de marca.",
+      "Don't usar o âmbar fora de atenção e pendências.",
+      "Don't pintar blocos grandes de verde chapado; profundidade vem de luz e sombra.",
+      "Don't introduzir uma segunda família tipográfica."
+    ]
+  }
+}

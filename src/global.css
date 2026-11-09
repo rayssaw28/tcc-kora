@@ -1,13 +1,26 @@
 :root {
   --font-ui: Archivo, ui-sans-serif, system-ui, sans-serif;
   --brand: #0e684e;
-  --canvas: #f6f8f7;
+  --canvas: #f1f4f2;
+  --placeholder: #687570;
+  --scroll: #c9d2cd;
+  --selecao: #ffe1a6;
+}
+
+/* Modo escuro: o atributo é definido pelo botão de tema (AlternarTema). */
+:root[data-tema='escuro'] {
+  --brand: #3cc793;
+  --canvas: #0d1311;
+  --placeholder: #8a9893;
+  --scroll: #36433d;
+  --selecao: #5a4418;
 }
 
 html,
 body,
 #root {
   background: var(--canvas);
+  transition: background-color 0.2s ease;
 }
 
 * {
@@ -44,11 +57,16 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
-  color: #8c9892;
+  color: var(--placeholder);
 }
 
 input:focus,
 textarea:focus {
+  outline: none;
+}
+
+/* O campo de busca já destaca a própria borda ao receber foco. */
+input[role='search']:focus-visible {
   outline: none;
 }
 
@@ -62,7 +80,7 @@ textarea:focus-visible {
 }
 
 ::selection {
-  background: #cfe6da;
+  background: var(--selecao);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -70,4 +88,10 @@ textarea:focus-visible {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* Barra de rolagem discreta, no tom dos neutros */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll) transparent;
 }

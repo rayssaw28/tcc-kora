@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import { ExternalLink } from 'lucide-react-native';
 
 import { AtestadoResponse, EspelhoPontoResponse } from '@/api/types';
 import { AtestadosSection } from '@/components/AtestadosSection';
 import { ui } from '@/components/ui';
-import { color } from '@/constants/theme';
+import { color, estilos } from '@/constants/theme';
 
 export function AdminJornadaSection({
   atestados,
@@ -73,10 +73,10 @@ export function AdminJornadaSection({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   stack: { gap: 16 },
   colunas: { flexDirection: 'row', alignItems: 'flex-start', gap: 20 },
   colunaPrincipal: { flex: 1, minWidth: 0 },
   colunaLateral: { width: 400, flexShrink: 0 },
   negative: { color: color.danger },
-});
+}));

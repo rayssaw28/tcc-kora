@@ -6,6 +6,7 @@ export default function Root({ children }: PropsWithChildren) {
     <html lang="pt-BR">
       <head>
         <meta charSet="utf-8" />
+        <title>Conformia</title>
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="theme-color" content="#0B4A37" />
@@ -16,6 +17,12 @@ export default function Root({ children }: PropsWithChildren) {
           href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap"
         />
         <ScrollViewStyleReset />
+        {/* Aplica o tema salvo antes do primeiro desenho, evitando o clarão ao recarregar no modo escuro. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{if(localStorage.getItem('conformia_tema')==='escuro'){document.documentElement.dataset.tema='escuro';document.documentElement.style.colorScheme='dark'}}catch(e){}",
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>

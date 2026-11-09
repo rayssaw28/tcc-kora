@@ -4,7 +4,6 @@ import {
   Modal,
   type KeyboardTypeOptions,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -23,7 +22,7 @@ import {
   StatusDocumento,
 } from '@/api/types';
 import { Badge, ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, type } from '@/constants/theme';
 
 type Arquivo = { uri: string; name: string; type: string; file?: File };
 
@@ -431,7 +430,7 @@ function mensagemErro(e: unknown, fallback: string): string {
   return fallback;
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   section: ui.section,
   title: ui.title,
   subtitle: ui.subtitle,
@@ -473,4 +472,4 @@ const styles = StyleSheet.create({
   overlay: ui.overlay,
   modal: { ...ui.modal, maxWidth: 480 },
   modalTitle: ui.modalTitle,
-});
+}));

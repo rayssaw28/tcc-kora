@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Modal,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -16,6 +15,7 @@ import {
   TipoDocumento,
 } from '@/api/types';
 import { AddButton, ui } from '@/components/ui';
+import { estilos } from '@/constants/theme';
 
 const TIPOS: { id: TipoDocumento; label: string }[] = [
   { id: 'CPF', label: 'CPF' },
@@ -150,7 +150,7 @@ function mensagemErro(e: unknown, fallback: string): string {
   return fallback;
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   section: ui.section,
   header: ui.header,
   headerText: ui.headerText,
@@ -173,4 +173,4 @@ const styles = StyleSheet.create({
   cancelText: ui.btnText,
   save: { ...ui.btn, ...ui.btnPrimary },
   saveText: ui.btnTextOnColor,
-});
+}));

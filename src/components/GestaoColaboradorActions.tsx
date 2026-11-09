@@ -3,7 +3,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -17,7 +16,7 @@ import {
   Perfil,
 } from '@/api/types';
 import { Badge, ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, type } from '@/constants/theme';
 
 export function GestaoColaboradorActions({
   funcionario,
@@ -264,7 +263,7 @@ function formatarData(valor: string): string {
   return new Date(valor).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   stack: { gap: 16 },
   card: ui.section,
   aviso: { backgroundColor: color.warningSoft, borderWidth: 1, borderColor: color.warningLine, borderRadius: 12, padding: 20, gap: 6 },
@@ -302,4 +301,4 @@ const styles = StyleSheet.create({
   cancel: { ...ui.btn, ...ui.btnSecondary },
   cancelText: ui.btnText,
   confirm: { ...ui.btn, ...ui.btnPrimary },
-});
+}));

@@ -1,7 +1,6 @@
 import { Search } from 'lucide-react-native';
 import { useState } from 'react';
 import {
-  StyleSheet,
   TextInput,
   View,
   type StyleProp,
@@ -10,7 +9,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { color, radius, type } from '@/constants/theme';
+import { color, estilos, radius, type } from '@/constants/theme';
 
 type SearchInputProps = TextInputProps & {
   containerStyle?: StyleProp<ViewStyle>;
@@ -47,7 +46,7 @@ export function SearchInput({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   container: {
     minHeight: 44,
     flexDirection: 'row',
@@ -69,4 +68,4 @@ const styles = StyleSheet.create({
     color: color.ink,
     ...type.body,
   },
-});
+}));

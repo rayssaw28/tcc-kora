@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { AvaliacaoResponse, ConsentimentoResponse } from '@/api/types';
 import { Badge, ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, type } from '@/constants/theme';
 
 export function HistoricoGestorSection({
   avaliacoes,
@@ -78,11 +78,11 @@ function formatarNota(valor: number | null): string {
   return valor === null ? '-' : Number(valor).toFixed(1).replace('.', ',');
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   stack: { gap: 16 },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   score: { color: color.ink, ...type.title, fontWeight: '600' },
   criterios: { gap: 2 },
   criterio: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
   criterioNota: { color: color.inkSoft, ...type.small, fontWeight: '600' },
-});
+}));
