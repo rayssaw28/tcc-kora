@@ -22,6 +22,11 @@ import { AlternarTema } from '@/components/AlternarTema';
 import { Brilho } from '@/components/Brilho';
 import { color, estilos, radius, type } from '@/constants/theme';
 
+// O painel com degradê é escuro nos dois modos; `onBrand` inverte no modo escuro,
+// então os textos sobre ele usam cores claras fixas.
+const SOBRE_PAINEL = '#FFFFFF';
+const SOBRE_PAINEL_SUAVE = '#FFFFFF';
+
 export default function LoginScreen() {
   const { width } = useWindowDimensions();
   const [email, setEmail] = useState('admin@korainc.com.br');
@@ -226,12 +231,12 @@ const styles = estilos(() => ({
   },
   painelTexto: {
     maxWidth: 400,
-    color: color.onBrand,
+    color: SOBRE_PAINEL,
     ...type.display,
     fontWeight: '500',
   },
   painelRodape: {
-    color: color.onBrandMuted,
+    color: SOBRE_PAINEL_SUAVE,
     ...type.small,
   },
   marca: {
@@ -255,7 +260,7 @@ const styles = estilos(() => ({
     height: 24,
   },
   marcaNome: {
-    color: color.onBrand,
+    color: SOBRE_PAINEL,
     ...type.lead,
     fontWeight: '600',
   },
