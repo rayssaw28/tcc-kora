@@ -62,7 +62,7 @@ export function HistoricoGestorSection({
               <Text style={ui.rowTitle}>Versão {item.versaoTermo}</Text>
               <Text style={ui.rowMeta}>{formatarData(item.registradoEm)}</Text>
             </View>
-            <Badge label={item.aceito ? 'Aceito' : 'Não aceito'} tom={item.aceito ? 'ok' : 'bad'} />
+            <Badge label={item.aceito ? 'Aceito' : 'Revogado'} tom={item.aceito ? 'ok' : 'bad'} />
           </View>
         )) : <Text style={ui.empty}>Nenhuma assinatura registrada.</Text>}
       </View>

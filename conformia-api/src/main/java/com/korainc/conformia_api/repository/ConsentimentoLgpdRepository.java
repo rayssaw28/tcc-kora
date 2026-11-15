@@ -8,11 +8,8 @@ import java.util.Optional;
 
 public interface ConsentimentoLgpdRepository extends JpaRepository<ConsentimentoLgpd, Long> {
 
-    List<ConsentimentoLgpd> findByFuncionarioIdOrderByRegistradoEmDesc(Long funcionarioId);
+    List<ConsentimentoLgpd> findByFuncionarioIdOrderByRegistradoEmDescIdDesc(Long funcionarioId);
 
-    Optional<ConsentimentoLgpd> findFirstByFuncionarioIdAndVersaoTermoAndUrlTermoAndAceitoTrueOrderByRegistradoEmDesc(
-            Long funcionarioId,
-            String versaoTermo,
-            String urlTermo
-    );
+    /** Último registro do log (aceite ou revogação) do funcionário: define o estado atual. */
+    Optional<ConsentimentoLgpd> findFirstByFuncionarioIdOrderByRegistradoEmDescIdDesc(Long funcionarioId);
 }

@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +36,25 @@ public class ConsentimentoController {
             HttpServletRequest http
     ) {
         return service.registrar(usuario.getId(), http.getRemoteAddr());
+    }
+
+    @DeleteMapping("/api/funcionarios/me/consentimento")
+    public ConsentimentoResponse revogar(
+            @AuthenticationPrincipal AuthenticatedUser usuario,
+            HttpServletRequest http
+    ) {
+        return service.revogar(usuario.getId(), http.getRemoteAddr());
+    }
+
+    @DeleteMapping("/api/funcionarios/{funcionarioId}/consentimento")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ConsentimentoResponse revogarPorAdmin(
+            @PathVariable Long funcionarioId,
+            @AuthenticationPrincipal AuthenticatedUser usuario,
+            HttpServletRequest http
+    ) {
+        return service.revogarPorAdmin(funcionarioId, http.getRemoteAddr(),
+                usuario.getId(), usuario.getFuncionario().getNome());
     }
 
     @GetMapping("/api/termos/lgpd/atual")

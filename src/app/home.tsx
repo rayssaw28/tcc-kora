@@ -509,6 +509,37 @@ export default function HomeScreen() {
     }
   }
 
+  async function revogarConsentimento() {
+    setAtualizando(true);
+    setMensagem(null);
+    setErro(null);
+    try {
+      await api.delete('/api/funcionarios/me/consentimento');
+      const atualizados = await buscarLista<ConsentimentoResponse>(
+        '/api/funcionarios/me/consentimento',
+      );
+      setConsentimentos(atualizados);
+      setMensagem('Consentimento LGPD revogado.');
+    } catch (e) {
+      setErro(mensagemErro(e, 'Não foi possível revogar o consentimento.'));
+    } finally {
+      setAtualizando(false);
+    }
+  }
+
+  async function revogarConsentimentoColaborador(id: number) {
+    setErro(null);
+    try {
+      await api.delete(`/api/funcionarios/${id}/consentimento`);
+      if (me && alvoId) {
+        await carregarDadosAlvo(alvoId, me.id, me.perfil);
+      }
+      setMensagem('Consentimento LGPD revogado.');
+    } catch (e) {
+      setErro(mensagemErro(e, 'Não foi possível revogar o consentimento.'));
+    }
+  }
+
   async function abrirTermosLgpd() {
     if (!termoLgpd) {
       return;
@@ -759,6 +790,7 @@ export default function HomeScreen() {
       termoLgpd={termoLgpd}
       onAbrirTermos={abrirTermosLgpd}
       onAssinarTermo={registrarConsentimento}
+      onRevogarTermo={revogarConsentimento}
       isAdmin={isAdmin}
       onSenhaAlterada={setMensagem}
     />
@@ -998,6 +1030,7 @@ export default function HomeScreen() {
                     onAtualizarProfissional={atualizarDadosProfissionais}
                     onDesligar={desligarColaborador}
                     onRedefinirSenha={redefinirSenha}
+                    onRevogarConsentimento={revogarConsentimentoColaborador}
                   />
                 ) : null}
                 <DadosColaborador
@@ -1915,6 +1948,7 @@ function Inicio({
   termoLgpd,
   onAbrirTermos,
   onAssinarTermo,
+  onRevogarTermo,
   isAdmin,
   onSenhaAlterada,
 }: {
@@ -1922,6 +1956,7 @@ function Inicio({
   termoLgpd: TermoLgpdResponse | null;
   onAbrirTermos: () => void;
   onAssinarTermo: () => void;
+  onRevogarTermo: () => void;
   isAdmin: boolean;
   onSenhaAlterada: (texto: string) => void;
 }) {
@@ -1933,6 +1968,7 @@ function Inicio({
           termo={termoLgpd}
           onAbrirTermos={onAbrirTermos}
           onAssinar={onAssinarTermo}
+          onRevogar={onRevogarTermo}
         />
       ) : null}
       <SenhaSection onSucesso={onSenhaAlterada} />
@@ -2460,12 +2496,17 @@ function obterAssinaturaAtual(
     return undefined;
   }
 
-  return consentimentos.find(
-    (consentimento) =>
-      consentimento.aceito &&
-      consentimento.versaoTermo === termo.versao &&
-      consentimento.urlTermo === termo.url,
-  );
+  // O log é append-only e vem ordenado do mais recente: o estado atual é o último registro.
+  // Um aceite só vale se não houve revogação posterior.
+  const ultimo = consentimentos[0];
+  if (
+    ultimo?.aceito &&
+    ultimo.versaoTermo === termo.versao &&
+    ultimo.urlTermo === termo.url
+  ) {
+    return ultimo;
+  }
+  return undefined;
 }
 
 function LgpdSection({
@@ -2473,13 +2514,17 @@ function LgpdSection({
   termo,
   onAbrirTermos,
   onAssinar,
+  onRevogar,
 }: {
   consentimentos: ConsentimentoResponse[];
   termo: TermoLgpdResponse | null;
   onAbrirTermos: () => void;
   onAssinar: () => void;
+  onRevogar: () => void;
 }) {
+  const [confirmandoRevogacao, setConfirmandoRevogacao] = useState(false);
   const assinatura = obterAssinaturaAtual(consentimentos, termo);
+  const revogado = !assinatura && consentimentos[0]?.aceito === false;
 
   return (
     <Section title="Termo LGPD" subtitle="Como a empresa trata seus dados pessoais">
@@ -2492,7 +2537,9 @@ function LgpdSection({
           <InfoLine label="Versão vigente" value={termo.versao} />
           <InfoLine
             label="Situação"
-            value={assinatura ? 'Assinado' : 'Assinatura pendente'}
+            value={
+              assinatura ? 'Assinado' : revogado ? 'Consentimento revogado' : 'Assinatura pendente'
+            }
           />
           {assinatura ? (
             <InfoLine label="Assinado em" value={formatarDataHora(assinatura.registradoEm)} />
@@ -2504,8 +2551,38 @@ function LgpdSection({
             <Text style={styles.termoLinkTexto}>Ler o termo completo</Text>
           </Pressable>
           {!assinatura ? (
-            <ActionButton label="Assinar termo" onPress={onAssinar} tone="primary" />
-          ) : null}
+            <ActionButton
+              label={revogado ? 'Assinar termo novamente' : 'Assinar termo'}
+              onPress={onAssinar}
+              tone="primary"
+            />
+          ) : confirmandoRevogacao ? (
+            <>
+              <Text style={styles.lgpdTexto}>
+                Ao revogar, você retira o consentimento dado a este termo. O registro do aceite
+                anterior é mantido no histórico e você poderá assinar novamente quando quiser.
+              </Text>
+              <ActionButton
+                label="Confirmar revogação"
+                tone="danger"
+                onPress={() => {
+                  setConfirmandoRevogacao(false);
+                  onRevogar();
+                }}
+              />
+              <ActionButton
+                label="Cancelar"
+                tone="ghost"
+                onPress={() => setConfirmandoRevogacao(false)}
+              />
+            </>
+          ) : (
+            <ActionButton
+              label="Revogar consentimento"
+              tone="ghost"
+              onPress={() => setConfirmandoRevogacao(true)}
+            />
+          )}
         </>
       ) : (
         <Empty text="Termo LGPD indisponível." />
