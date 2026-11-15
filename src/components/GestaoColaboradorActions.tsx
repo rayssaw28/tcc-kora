@@ -30,6 +30,7 @@ export function GestaoColaboradorActions({
   onAtualizarProfissional,
   onDesligar,
   onRedefinirSenha,
+  onRevogarConsentimento,
 }: {
   funcionario: FuncionarioResponse;
   funcionarios: FuncionarioResponse[];
@@ -44,8 +45,13 @@ export function GestaoColaboradorActions({
   ) => Promise<void>;
   onDesligar: (id: number, motivo: string) => Promise<void>;
   onRedefinirSenha: (id: number, senha: string) => Promise<void>;
+  onRevogarConsentimento: (id: number) => Promise<void>;
 }) {
-  const [modal, setModal] = useState<'vinculo' | 'revisao' | 'senha' | 'desligar' | null>(null);
+  const [modal, setModal] = useState<
+    'vinculo' | 'revisao' | 'senha' | 'desligar' | 'revogar' | null
+  >(null);
+  // consentimentos vem do mais recente para o mais antigo: o primeiro define o estado atual.
+  const consentimentoAtivo = consentimentos[0]?.aceito === true;
   const [perfil, setPerfil] = useState<Perfil>(funcionario.perfil);
   const [departamentoId, setDepartamentoId] = useState(String(funcionario.departamentoId ?? ''));
   const [cargoId, setCargoId] = useState(String(funcionario.cargoId ?? ''));
@@ -106,11 +112,20 @@ export function GestaoColaboradorActions({
                   <Text style={styles.itemTitle}>Versão {item.versaoTermo}</Text>
                   <Text style={styles.subtitle}>{formatarData(item.registradoEm)}</Text>
                 </View>
-                <Badge label={item.aceito ? 'Aceito' : 'Não aceito'} tom={item.aceito ? 'ok' : 'bad'} />
+                <Badge label={item.aceito ? 'Aceito' : 'Revogado'} tom={item.aceito ? 'ok' : 'bad'} />
               </View>
             ))}
           </View>
         ) : <Text style={styles.empty}>Nenhuma assinatura registrada.</Text>}
+        {consentimentoAtivo ? (
+          <View style={styles.actions}>
+            <Botao
+              label="Registrar revogação do consentimento"
+              tom="perigo"
+              onPress={() => setModal('revogar')}
+            />
+          </View>
+        ) : null}
       </View>
 
       <Modal visible={modal === 'vinculo'} transparent animationType="fade" onRequestClose={() => setModal(null)}>
@@ -172,6 +187,20 @@ export function GestaoColaboradorActions({
             setSenha('');
             setModal(null);
           }} label="Redefinir senha" />
+        </View></View>
+      </Modal>
+
+      <Modal visible={modal === 'revogar'} transparent animationType="fade" onRequestClose={() => setModal(null)}>
+        <View style={styles.overlay}><View style={styles.modal}>
+          <Text style={styles.modalTitle}>Revogar consentimento de {funcionario.nome}?</Text>
+          <Text style={styles.subtitle}>
+            Use apenas quando o titular solicitou a revogação. O aceite anterior continua no
+            histórico e a ação fica registrada com o seu nome.
+          </Text>
+          <Rodape danger onCancelar={() => setModal(null)} onConfirmar={async () => {
+            await onRevogarConsentimento(funcionario.id);
+            setModal(null);
+          }} label="Confirmar revogação" />
         </View></View>
       </Modal>
 
