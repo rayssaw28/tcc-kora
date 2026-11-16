@@ -157,13 +157,12 @@ const labelsAdmissao: Record<StatusAdmissao, string> = {
   DESLIGADO: 'Desligado',
 };
 
-// Guarda a aba aberta para que a troca de tema (que remonta as telas) não volte ao Início.
 let abaMemorizada: Aba = 'inicio';
 
 export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const desktopWeb = isDesktopWeb(width);
-  // Menu no topo a partir de 1024px; abaixo disso, barra inferior de app.
+
   const barraTopo = Platform.OS === 'web' && width >= 1024;
   const colunasInicio = barraTopo ? (width >= 1280 ? 3 : 2) : 1;
   const [aba, setAba] = useState<Aba>(() => abaMemorizada);
@@ -743,7 +742,6 @@ export default function HomeScreen() {
     .filter((tab) => tab.id !== 'holerites' || isAdmin || isGestor)
     .filter((tab) => tab.id !== 'pessoal' || !isAdmin);
 
-  // No celular o RH trabalha em Jornada e Colaboradores: eles ficam na barra inferior, não em "Mais".
   const prioridadeRh: Aba[] = ['inicio', 'jornada', 'colaboradores', 'holerites'];
   const navegacaoMobile = isAdmin
     ? [
@@ -775,8 +773,6 @@ export default function HomeScreen() {
 
   const cabecalho = cabecalhoDaAba(aba, me, isAdmin);
 
-  // A conta administrativa não tem termo LGPD a assinar e troca a senha pelo menu da conta:
-  // sem coluna lateral na home.
   const lateralInicio = isAdmin ? null : (
     <Inicio
       consentimentos={consentimentos}
@@ -788,7 +784,6 @@ export default function HomeScreen() {
     />
   );
 
-  // Atalhos do RH: contam só o que ainda não foi aberto e levam à primeira pendência de cada tipo.
   const atalhosRh = isAdmin
     ? ([
       { rotulo: 'Atestados', secao: 'jornada' },
@@ -1443,7 +1438,6 @@ async function carregarSolicitacoesRh(
   );
 }
 
-/** Período curto e sem cortes: "05/06/2026 (1 dia)" ou "05/06/2026 a 07/06/2026 (3 dias)". */
 function descricaoPeriodo(inicio: string, fim: string): string {
   const dias = Math.round((new Date(fim).getTime() - new Date(inicio).getTime()) / 86_400_000) + 1;
   if (!Number.isFinite(dias) || dias < 1) {
@@ -1607,7 +1601,6 @@ const ICONES_MENU: Record<Aba, typeof Home> = {
   org: Network,
 };
 
-/** Cada módulo tem um tom próprio, repetido no cabeçalho da página e nas notificações. */
 const TOM_MODULO: Record<Aba, NomeTom> = {
   inicio: 'verde',
   pessoal: 'indigo',
@@ -1624,8 +1617,7 @@ function IconeModulo({ aba, grande = false, pequeno = false }: { aba: Aba; grand
   const Icone = ICONES_MENU[aba];
   const tom = tons[TOM_MODULO[aba]];
   const tamanho = grande ? 52 : pequeno ? 36 : 44;
-  // Ladrilho cheio com ícone branco: destaca tanto no fundo claro quanto no escuro,
-  // e a sombra na cor do próprio módulo dá a sensação de luz.
+
   return (
     <View
       style={[
@@ -1674,7 +1666,7 @@ function BarraTopo({
   onConta: () => void;
 }) {
   const { width } = useWindowDimensions();
-  // Com muitos itens (perfil de RH), o nome da marca sai em telas médias para o menu caber.
+
   const mostrarNome = width >= 1200 || itens.length <= 6;
   return (
     <View style={styles.topo} role="banner">
@@ -1750,7 +1742,7 @@ function MenuConta({
   onAlterarSenha: () => void;
   onSair: () => void;
 }) {
-  // Alinha o menu à borda direita do conteúdo centralizado.
+
   const direita = Math.max((larguraJanela - LARGURA_CONTEUDO) / 2, 0) + 32;
   return (
     <Modal visible={visivel} transparent animationType="fade" onRequestClose={onFechar}>
@@ -1806,7 +1798,7 @@ function PerfilCard({ me }: { me: FuncionarioResponse | null }) {
       vazia: !me?.dataAdmissao,
     },
   ];
-  // A conta administrativa não tem cargo, departamento, líder nem admissão: não lista o que não existe.
+
   const linhas = me?.perfil === 'ADMIN' ? linhasCompletas.filter((linha) => !linha.vazia) : linhasCompletas;
   return (
     <View style={styles.perfilCard}>
@@ -2043,7 +2035,7 @@ function Mural({
   atalhos?: AtalhoMural[];
 }) {
   const { width } = useWindowDimensions();
-  // Em tela larga cada pendência de colaborador mostra a ação; no celular a linha inteira já é o toque.
+
   const mostrarAcao = width >= 720;
   return (
     <Section
@@ -2139,7 +2131,6 @@ function Inicio({
   );
 }
 
-/** Coluna principal + coluna lateral no desktop; empilhadas no celular. */
 function Colunas({
   ativo,
   principal,
@@ -2469,7 +2460,6 @@ function TrocaSenhaObrigatoriaModal({
     </Modal>
   );
 }
-
 
 function rotuloGenero(valor: FuncionarioResponse['genero']): string {
   if (valor === 'HOMEM') return 'Homem';
@@ -2801,7 +2791,6 @@ const styles = estilos(() => ({
     ...type.body,
   },
 
-  // Estrutura
   luzPagina: {
     bottom: undefined,
     height: 420,
@@ -2837,7 +2826,6 @@ const styles = estilos(() => ({
     gap: 20,
   },
 
-  // Barra superior (desktop)
   topo: {
     backgroundColor: color.header,
     borderBottomWidth: 1,
@@ -2936,7 +2924,6 @@ const styles = estilos(() => ({
     borderBottomColor: color.line,
   },
 
-  // Cartão de perfil (Início)
   perfilCard: {
     backgroundColor: color.surface,
     borderRadius: radius.lg,
@@ -3062,7 +3049,6 @@ const styles = estilos(() => ({
     color: color.brandDeep,
   },
 
-  // Barra superior e inferior (mobile)
   barraSuperior: {
     height: 56,
     flexDirection: 'row',
@@ -3155,7 +3141,7 @@ const styles = estilos(() => ({
     color: color.brandStrong,
     fontWeight: '600',
   },
-  // Âmbar é a cor de atenção do sistema; o número diz quantas pendências há.
+
   contadorSobreIcone: {
     position: 'absolute',
     top: -8,
@@ -3224,7 +3210,6 @@ const styles = estilos(() => ({
     color: color.danger,
   },
 
-  // Cabeçalho da página
   paginaCabecalho: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -3259,7 +3244,6 @@ const styles = estilos(() => ({
     ...type.small,
   },
 
-  // Início
   inicioGrade: {
     gap: 16,
   },
@@ -3302,7 +3286,6 @@ const styles = estilos(() => ({
     marginBottom: 6,
   },
 
-  // Colunas
   colunas: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -3317,7 +3300,6 @@ const styles = estilos(() => ({
     flexShrink: 0,
   },
 
-  // Blocos
   stack: {
     gap: 16,
   },

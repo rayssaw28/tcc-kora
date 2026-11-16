@@ -6,14 +6,12 @@ import { color, definirModo, estilos, obterModo, useModo, type Modo } from '@/co
 
 const TEMA_KEY = 'conformia_tema';
 
-/** Reflete o modo no documento (fundo da página, barras de rolagem, controles nativos). */
 function aplicarNoDocumento(modo: Modo) {
   if (Platform.OS !== 'web' || typeof document === 'undefined') return;
   document.documentElement.dataset.tema = modo;
   document.documentElement.style.colorScheme = modo === 'escuro' ? 'dark' : 'light';
 }
 
-/** Lê a preferência salva e aplica antes de o app ser desenhado. */
 export async function carregarModoSalvo(): Promise<void> {
   let salvo: string | null = null;
   try {
@@ -21,7 +19,6 @@ export async function carregarModoSalvo(): Promise<void> {
       ? window.localStorage.getItem(TEMA_KEY)
       : await SecureStore.getItemAsync(TEMA_KEY);
   } catch {
-    // Sem armazenamento disponível: segue no modo claro.
   }
   const modo: Modo = salvo === 'escuro' ? 'escuro' : 'claro';
   definirModo(modo);
@@ -39,11 +36,9 @@ export function alternarModo(): void {
       void SecureStore.setItemAsync(TEMA_KEY, modo);
     }
   } catch {
-    // A troca vale para a sessão mesmo sem conseguir salvar.
   }
 }
 
-/** Botão redondo que alterna entre modo claro e escuro. */
 export function AlternarTema({ style }: { style?: StyleProp<ViewStyle> }) {
   const escuro = useModo() === 'escuro';
   const Icone = escuro ? Sun : Moon;

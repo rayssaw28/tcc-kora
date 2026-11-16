@@ -72,7 +72,7 @@ export function OrganogramaSection({ organograma }: { organograma: OrganogramaNo
 
   const rolarAte = useCallback((id: number) => {
     if (Platform.OS !== 'web') return;
-    // No web, cada View é um elemento DOM; o navegador centraliza o card na área visível.
+
     setTimeout(() => {
       const no = refs.current.get(id) as unknown as HTMLElement | null;
       no?.scrollIntoView?.({ behavior: 'smooth', block: 'center', inline: 'center' });
@@ -111,7 +111,6 @@ export function OrganogramaSection({ organograma }: { organograma: OrganogramaNo
     if (node) node.scrollTo({ left: (node.scrollWidth - node.clientWidth) / 2, top: 0, behavior: 'smooth' });
   }
 
-  // Arrastar com o mouse para navegar pelo organograma (web).
   const arraste = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
   const eventosArraste = Platform.OS === 'web'
     ? {
@@ -587,7 +586,6 @@ function abertosAte(nodes: OrganogramaNode[], profundidade: number): Set<number>
   return ids;
 }
 
-/** Ids do topo até a pessoa (inclusive). */
 function caminhoAte(id: number, pessoas: Map<number, Pessoa>): number[] {
   const caminho: number[] = [];
   let atual = pessoas.get(id);

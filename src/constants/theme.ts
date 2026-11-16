@@ -1,14 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 
-/**
- * Tokens visuais do Conformia, em dois modos (claro e escuro).
- * Regra 60-30-10: neutros ocupam a maior parte da tela; o verde da marca
- * fica reservado às ações principais e ao estado ativo; o âmbar entra só no que
- * pede atenção (contadores de pendências). Profundidade vem de luz e sombra,
- * não de blocos de cor chapada.
- * Todo texto sobre fundo suave atinge contraste AA (4,5:1) nos dois modos.
- */
 const paletaClara = {
   ink: '#14201B',
   inkSoft: '#2F3D37',
@@ -29,7 +21,6 @@ const paletaClara = {
   onBrand: '#FFFFFF',
   onBrandMuted: '#B9D6C8',
 
-  // Barra superior em vidro
   header: 'rgba(255,255,255,0.72)',
   headerLine: 'rgba(20,32,27,0.07)',
   navTrack: 'rgba(20,32,27,0.045)',
@@ -38,7 +29,6 @@ const paletaClara = {
   onHeader: '#14201B',
   onHeaderMuted: '#5B6862',
 
-  // Acento de atenção (10%)
   accent: '#FFB224',
   onAccent: '#3A2500',
 
@@ -58,10 +48,6 @@ const paletaClara = {
 
 type Paleta = Record<keyof typeof paletaClara, string>;
 
-/**
- * No escuro, a marca fica mais luminosa e os botões cheios passam a usar texto
- * escuro (verde-claro com texto branco não teria contraste suficiente).
- */
 const paletaEscura: Paleta = {
   ink: '#E8EEEB',
   inkSoft: '#CBD5D0',
@@ -112,11 +98,6 @@ type NomeTom =
   | 'verde' | 'azul' | 'violeta' | 'laranja' | 'teal'
   | 'rosa' | 'indigo' | 'ciano' | 'ambar' | 'ardosia';
 
-/**
- * Tons categóricos: cada módulo do app tem o seu, para o usuário se orientar pela
- * cor além do texto. `solido` é o fundo dos ladrilhos de ícone (com ícone branco),
- * `texto` sobre `suave` serve para rótulos e iniciais (contraste 4,5:1).
- */
 const tonsClaros: Record<NomeTom, Tom> = {
   verde: { solido: '#0E684E', suave: '#E3F3EB', texto: '#0A5139' },
   azul: { solido: '#2563EB', suave: '#E6EEFD', texto: '#1D4ED8' },
@@ -143,7 +124,6 @@ const tonsEscuros: Record<NomeTom, Tom> = {
   ardosia: { solido: '#64748B', suave: '#232B36', texto: '#C2CCD9' },
 };
 
-/** Cores das luzes difusas usadas nos gradientes decorativos (componente Brilho). */
 const luzClara = { menta: '#BDEBD6', ceu: '#C9DDFB', lavanda: '#DCD3FA' };
 const luzEscura: typeof luzClara = { menta: '#1D5A44', ceu: '#1C3966', lavanda: '#382C6B' };
 
@@ -158,7 +138,6 @@ const sombra = (shadowColor: string, shadowOpacity: number, shadowRadius: number
   shadowColor, shadowOpacity, shadowRadius, shadowOffset: { width: 0, height }, elevation,
 });
 
-/** Sombras (viram box-shadow no web). No escuro, mais densas para ainda separar os planos. */
 const elevacaoClara = {
   cartao: sombra('#0B3B2D', 0.06, 12, 2, 1),
   barra: sombra('#14201B', 0.05, 16, 4, 2),
@@ -171,10 +150,6 @@ const elevacaoEscura: typeof elevacaoClara = {
   pilula: sombra('#000000', 0.45, 6, 1, 1),
   flutuante: sombra('#000000', 0.55, 28, 10, 6),
 };
-
-// ---------------------------------------------------------------------------
-// Modo atual
-// ---------------------------------------------------------------------------
 
 export type Modo = 'claro' | 'escuro';
 
@@ -191,7 +166,6 @@ export function definirModo(modo: Modo): void {
   ouvintes.forEach((ouvinte) => ouvinte());
 }
 
-/** Re-renderiza quem chamar sempre que o modo mudar. */
 export function useModo(): Modo {
   return useSyncExternalStore(
     (ouvinte) => {
@@ -203,7 +177,6 @@ export function useModo(): Modo {
   );
 }
 
-/** Objeto que sempre responde com os valores do modo atual. */
 function porModo<T extends object>(claro: T, escuro: T): T {
   return new Proxy({} as T, {
     get: (_, chave) => (modoAtual === 'escuro' ? escuro : claro)[chave as keyof T],
@@ -224,10 +197,6 @@ export const elevacao: typeof elevacaoClara = porModo(elevacaoClara, elevacaoEsc
 export type TomCor = Tom;
 export type { NomeTom };
 
-/**
- * StyleSheet que acompanha o modo: a fábrica roda uma vez por modo (lendo
- * `color`, `tons` etc. daquele modo) e o resultado fica em cache.
- */
 export function estilos<T extends StyleSheet.NamedStyles<T> | StyleSheet.NamedStyles<any>>(
   fabrica: () => T & StyleSheet.NamedStyles<any>,
 ): T {
@@ -242,7 +211,6 @@ const TONS_PESSOAS: NomeTom[] = [
   'verde', 'azul', 'violeta', 'laranja', 'teal', 'rosa', 'indigo', 'ciano', 'ambar',
 ];
 
-/** Cor estável por pessoa: o mesmo nome sempre gera o mesmo tom de avatar. */
 export function tomDoNome(nome?: string | null): TomCor {
   const texto = (nome ?? '').trim().toLowerCase();
   let hash = 0;
@@ -257,7 +225,6 @@ export const fontFamily = Platform.select({
   default: 'Archivo_400Regular',
 });
 
-/** Escala tipográfica: 12 · 13 · 15 · 17 · 20 · 24 · 30. */
 export const type = {
   caption: { fontSize: 12, lineHeight: 16 },
   small: { fontSize: 13, lineHeight: 19 },

@@ -44,7 +44,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthentication(AuthenticationException ex,
                                                              HttpServletRequest request) {
-        // Evita revelar se o e-mail está cadastrado.
+
         return build(HttpStatus.UNAUTHORIZED, "Credenciais inválidas.", request.getRequestURI());
     }
 

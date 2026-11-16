@@ -66,7 +66,7 @@ public class FileStorageService {
             try (var in = file.getInputStream()) {
                 Files.copy(in, destino, StandardCopyOption.REPLACE_EXISTING);
             }
-            // Mantém o caminho persistido independente do sistema operacional.
+
             return root.relativize(destino).toString().replace('\\', '/');
         } catch (IOException e) {
             throw new IllegalStateException("Falha ao gravar o arquivo no disco.", e);

@@ -26,18 +26,14 @@ import { Badge, type Tom } from '@/components/ui';
 import { RH_CONTATO_EMAIL } from '@/config';
 import { color, elevacao, estilos, radius, type } from '@/constants/theme';
 
-// Conta da demonstração: só existe no build de desenvolvimento, nunca em produção.
 const CONTA_DEMO = __DEV__ ? { email: 'admin@korainc.com.br', senha: 'Admin@123' } : null;
 
-// Recorte ilustrativo do mural exibido no painel lateral (dados fictícios).
 const MURAL_EXEMPLO: { titulo: string; status: string; tom: Tom }[] = [
   { titulo: 'Comprovante de residência', status: 'Aprovado', tom: 'ok' },
   { titulo: 'Holerite de outubro', status: 'Disponível', tom: 'info' },
   { titulo: 'Atestado médico', status: 'Em análise', tom: 'warn' },
 ];
 
-// Rascunho do formulário. A troca de tema recria as telas (a `key` do _layout.tsx), e isso
-// não pode apagar o que a pessoa digitou. Fica só em memória, nunca em disco.
 const rascunho = { email: '', senha: '', ajudaAberta: false };
 
 type ErroLogin = {
@@ -58,7 +54,7 @@ export default function LoginScreen() {
   const senhaRef = useRef<TextInput>(null);
   const rolagemRef = useRef<ScrollView>(null);
   const amplo = width >= 900;
-  // Em telas baixas o recorte do mural não cabe no painel; fica só a frase.
+
   const mostrarMural = height >= 680;
 
   function alterarEmail(valor: string) {
@@ -78,7 +74,6 @@ export default function LoginScreen() {
     setAjudaAberta(aberta);
   }
 
-  /** Mostra o erro e leva o foco ao campo que precisa de atenção. */
   function falhar(e: ErroLogin) {
     setErro(e);
     (e.campo === 'email' ? emailRef : e.campo ? senhaRef : null)?.current?.focus();
@@ -119,7 +114,7 @@ export default function LoginScreen() {
           mensagem: 'E-mail ou senha incorretos. Confira e tente de novo. Se esqueceu a senha, veja as instruções abaixo.',
           campo: 'ambos',
         });
-        // O caminho de recuperação é um só: o link abaixo do botão, aberto e à vista.
+
         definirAjuda(true);
         setTimeout(() => rolagemRef.current?.scrollToEnd({ animated: true }), 80);
       } else if (e.response.status >= 500) {
@@ -135,7 +130,7 @@ export default function LoginScreen() {
 
   const erroNoEmail = erro?.campo === 'email' || erro?.campo === 'ambos';
   const erroNaSenha = erro?.campo === 'senha' || erro?.campo === 'ambos';
-  // Erros de um campo aparecem junto dele; rede, servidor e credenciais ficam na faixa geral.
+
   const erroGeral = erro && (erro.campo === 'ambos' || erro.campo === null) ? erro : null;
 
   return (
@@ -365,7 +360,6 @@ export default function LoginScreen() {
   );
 }
 
-/** Mensagem de validação junto do campo; `id` liga o texto ao campo via aria-describedby. */
 function ErroCampo({ id, mensagem }: { id: string; mensagem: string }) {
   return (
     <View style={styles.erroCampo} accessibilityRole="alert">

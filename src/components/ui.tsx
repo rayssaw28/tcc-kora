@@ -3,13 +3,8 @@ import { Pressable, Text, View } from 'react-native';
 
 import { color, elevacao, estilos, radius, type } from '@/constants/theme';
 
-/**
- * Peças visuais compartilhadas pelas seções do app.
- * Hierarquia: seção (cartão branco com borda) > linhas separadas por divisores.
- * Nada de cartão dentro de cartão.
- */
 export const ui = estilos(() => ({
-  // Seção
+
   section: {
     backgroundColor: color.surface,
     borderRadius: radius.lg,
@@ -51,7 +46,6 @@ export const ui = estilos(() => ({
     paddingVertical: 4,
   },
 
-  // Linhas de lista (separadas por divisor, sem caixa)
   list: {
     gap: 0,
   },
@@ -93,7 +87,6 @@ export const ui = estilos(() => ({
     fontWeight: '600',
   },
 
-  // Botões
   btn: {
     minHeight: 40,
     paddingHorizontal: 16,
@@ -180,7 +173,6 @@ export const ui = estilos(() => ({
     fontWeight: '600',
   },
 
-  // Status
   badge: {
     alignSelf: 'flex-start',
     borderRadius: radius.pill,
@@ -202,7 +194,6 @@ export const ui = estilos(() => ({
   badgeNeutral: { backgroundColor: color.sunken },
   badgeNeutralText: { color: color.inkSoft },
 
-  // Formulários
   field: {
     gap: 6,
   },
@@ -242,7 +233,6 @@ export const ui = estilos(() => ({
     ...type.small,
   },
 
-  // Chips de seleção
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -272,7 +262,6 @@ export const ui = estilos(() => ({
     fontWeight: '600',
   },
 
-  // Abas segmentadas
   segmented: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -302,7 +291,6 @@ export const ui = estilos(() => ({
     fontWeight: '600',
   },
 
-  // Modais
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(11,59,45,0.45)',
@@ -357,7 +345,6 @@ export const ui = estilos(() => ({
   },
 }));
 
-/** Botão principal de cabeçalho de seção: sempre com rótulo, nunca só "+". */
 export function AddButton({
   label,
   onPress,

@@ -7,7 +7,6 @@
   --selecao: #ffe1a6;
 }
 
-/* Modo escuro: o atributo é definido pelo botão de tema (AlternarTema). */
 :root[data-tema='escuro'] {
   --brand: #3cc793;
   --canvas: #0d1311;
@@ -27,8 +26,6 @@ body,
   box-sizing: border-box;
 }
 
-/* O react-native-web define font-family por classe atômica em cada Text;
-   aqui a família da marca vence em toda a árvore do app. */
 html,
 body,
 #root,
@@ -65,7 +62,6 @@ textarea:focus {
   outline: none;
 }
 
-/* O campo de busca já destaca a própria borda ao receber foco. */
 input[role='search']:focus-visible {
   outline: none;
 }
@@ -90,7 +86,6 @@ textarea:focus-visible {
   }
 }
 
-/* Barra de rolagem discreta, no tom dos neutros */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--scroll) transparent;
