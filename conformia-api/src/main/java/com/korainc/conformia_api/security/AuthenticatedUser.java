@@ -42,7 +42,7 @@ public class AuthenticatedUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // Reforça o bloqueio de contas inativas no Spring Security.
+
         return funcionario.isAtivo();
     }
 

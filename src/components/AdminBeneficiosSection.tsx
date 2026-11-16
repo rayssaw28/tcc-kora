@@ -4,7 +4,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -20,7 +19,7 @@ import {
 } from '@/api/types';
 import { SearchInput } from '@/components/SearchInput';
 import { AddButton, ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, type } from '@/constants/theme';
 
 type Publico = 'TODOS' | 'DEPARTAMENTO' | 'COLABORADOR';
 
@@ -488,7 +487,7 @@ function formatarDinheiro(valor: number): string {
   }).format(valor);
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   section: ui.section,
   header: ui.header,
   headerText: ui.headerText,
@@ -534,4 +533,4 @@ const styles = StyleSheet.create({
   dangerButton: { ...ui.btn, ...ui.btnDanger },
   saveText: ui.btnTextOnColor,
   actionTextRegular: {},
-});
+}));

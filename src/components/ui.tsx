@@ -1,15 +1,10 @@
 import { Plus } from 'lucide-react-native';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { color, radius, type } from '@/constants/theme';
+import { color, elevacao, estilos, radius, type } from '@/constants/theme';
 
-/**
- * Peças visuais compartilhadas pelas seções do app.
- * Hierarquia: seção (cartão branco com borda) > linhas separadas por divisores.
- * Nada de cartão dentro de cartão.
- */
-export const ui = StyleSheet.create({
-  // Seção
+export const ui = estilos(() => ({
+
   section: {
     backgroundColor: color.surface,
     borderRadius: radius.lg,
@@ -17,6 +12,7 @@ export const ui = StyleSheet.create({
     borderColor: color.line,
     padding: 20,
     gap: 12,
+    ...elevacao.cartao,
   },
   header: {
     flexDirection: 'row',
@@ -50,7 +46,6 @@ export const ui = StyleSheet.create({
     paddingVertical: 4,
   },
 
-  // Linhas de lista (separadas por divisor, sem caixa)
   list: {
     gap: 0,
   },
@@ -92,7 +87,6 @@ export const ui = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Botões
   btn: {
     minHeight: 40,
     paddingHorizontal: 16,
@@ -179,7 +173,6 @@ export const ui = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Status
   badge: {
     alignSelf: 'flex-start',
     borderRadius: radius.pill,
@@ -196,10 +189,11 @@ export const ui = StyleSheet.create({
   badgeWarnText: { color: color.warning },
   badgeBad: { backgroundColor: color.dangerSoft },
   badgeBadText: { color: color.danger },
+  badgeInfo: { backgroundColor: color.infoSoft },
+  badgeInfoText: { color: color.info },
   badgeNeutral: { backgroundColor: color.sunken },
   badgeNeutralText: { color: color.inkSoft },
 
-  // Formulários
   field: {
     gap: 6,
   },
@@ -239,7 +233,6 @@ export const ui = StyleSheet.create({
     ...type.small,
   },
 
-  // Chips de seleção
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -269,7 +262,6 @@ export const ui = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Abas segmentadas
   segmented: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -299,10 +291,9 @@ export const ui = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Modais
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(23,33,28,0.48)',
+    backgroundColor: 'rgba(11,59,45,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -315,6 +306,7 @@ export const ui = StyleSheet.create({
     borderRadius: radius.lg,
     padding: 24,
     gap: 16,
+    ...elevacao.flutuante,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -351,9 +343,8 @@ export const ui = StyleSheet.create({
     borderColor: color.lineStrong,
     backgroundColor: color.surface,
   },
-});
+}));
 
-/** Botão principal de cabeçalho de seção: sempre com rótulo, nunca só "+". */
 export function AddButton({
   label,
   onPress,
@@ -378,11 +369,11 @@ export function AddButton({
   );
 }
 
-export type Tom = 'ok' | 'warn' | 'bad' | 'neutral';
+export type Tom = 'ok' | 'warn' | 'bad' | 'info' | 'neutral';
 
 export function Badge({ label, tom }: { label: string; tom: Tom }) {
-  const box = tom === 'ok' ? ui.badgeOk : tom === 'warn' ? ui.badgeWarn : tom === 'bad' ? ui.badgeBad : ui.badgeNeutral;
-  const txt = tom === 'ok' ? ui.badgeOkText : tom === 'warn' ? ui.badgeWarnText : tom === 'bad' ? ui.badgeBadText : ui.badgeNeutralText;
+  const box = { ok: ui.badgeOk, warn: ui.badgeWarn, bad: ui.badgeBad, info: ui.badgeInfo, neutral: ui.badgeNeutral }[tom];
+  const txt = { ok: ui.badgeOkText, warn: ui.badgeWarnText, bad: ui.badgeBadText, info: ui.badgeInfoText, neutral: ui.badgeNeutralText }[tom];
   return (
     <View style={[ui.badge, box]}>
       <Text style={[ui.badgeText, txt]}>{label}</Text>

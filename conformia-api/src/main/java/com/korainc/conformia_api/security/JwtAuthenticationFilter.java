@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception ex) {
-            // Tokens inválidos seguem como requisições não autenticadas.
+
             SecurityContextHolder.clearContext();
         }
 

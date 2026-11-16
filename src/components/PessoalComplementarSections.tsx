@@ -4,7 +4,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -21,7 +20,7 @@ import {
   TipoContaBancaria,
 } from '@/api/types';
 import { ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, type } from '@/constants/theme';
 
 type Opcao = readonly [string, string];
 
@@ -494,7 +493,7 @@ function mensagemErro(e: unknown, fallback: string): string {
   return fallback;
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   section: ui.section,
   header: ui.header,
   headerText: ui.headerText,
@@ -535,4 +534,4 @@ const styles = StyleSheet.create({
   formacoesLista: { gap: 16 },
   formacaoResumo: { gap: 0 },
   empty: ui.empty,
-});
+}));

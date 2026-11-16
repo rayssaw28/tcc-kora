@@ -3,7 +3,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   useWindowDimensions,
@@ -21,7 +20,7 @@ import {
 } from '@/api/types';
 import { SearchInput } from '@/components/SearchInput';
 import { AddButton, ui } from '@/components/ui';
-import { color } from '@/constants/theme';
+import { color, estilos } from '@/constants/theme';
 
 type TipoCadastro = 'cargo' | 'departamento';
 
@@ -359,7 +358,7 @@ function isCeo(funcionario: FuncionarioResponse): boolean {
   return funcionario.cargoNome?.trim().toLocaleLowerCase('pt-BR') === 'ceo';
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   stack: { gap: 16 },
   colunas: { flexDirection: 'row', alignItems: 'flex-start', gap: 20 },
   colunaPrincipal: { flex: 1, minWidth: 0 },
@@ -403,4 +402,4 @@ const styles = StyleSheet.create({
   leaderActive: { borderColor: color.brand, backgroundColor: color.brandSoft },
   clearLeader: { alignSelf: 'flex-start', paddingVertical: 5 },
   clearLeaderText: ui.btnTextDanger,
-});
+}));

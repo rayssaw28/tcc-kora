@@ -1,21 +1,31 @@
 :root {
   --font-ui: Archivo, ui-sans-serif, system-ui, sans-serif;
   --brand: #0e684e;
-  --canvas: #f6f8f7;
+  --canvas: #f1f4f2;
+  --placeholder: #687570;
+  --scroll: #c9d2cd;
+  --selecao: #ffe1a6;
+}
+
+:root[data-tema='escuro'] {
+  --brand: #3cc793;
+  --canvas: #0d1311;
+  --placeholder: #8a9893;
+  --scroll: #36433d;
+  --selecao: #5a4418;
 }
 
 html,
 body,
 #root {
   background: var(--canvas);
+  transition: background-color 0.2s ease;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* O react-native-web define font-family por classe atômica em cada Text;
-   aqui a família da marca vence em toda a árvore do app. */
 html,
 body,
 #root,
@@ -44,11 +54,15 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
-  color: #8c9892;
+  color: var(--placeholder);
 }
 
 input:focus,
 textarea:focus {
+  outline: none;
+}
+
+input[role='search']:focus-visible {
   outline: none;
 }
 
@@ -62,7 +76,7 @@ textarea:focus-visible {
 }
 
 ::selection {
-  background: #cfe6da;
+  background: var(--selecao);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -70,4 +84,9 @@ textarea:focus-visible {
     animation: none !important;
     transition: none !important;
   }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll) transparent;
 }

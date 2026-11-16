@@ -4,7 +4,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -20,7 +19,7 @@ import {
 } from '@/api/types';
 import { SearchInput } from '@/components/SearchInput';
 import { AddButton, ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, type } from '@/constants/theme';
 
 const CRITERIOS = [
   'Colaboracao',
@@ -469,7 +468,7 @@ function formatarData(valor: string): string {
   return new Date(valor).toLocaleDateString('pt-BR');
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   section: ui.section,
   header: ui.header,
   headerText: ui.headerText,
@@ -532,4 +531,4 @@ const styles = StyleSheet.create({
   unread: { width: 8, height: 8, borderRadius: 4, backgroundColor: color.brand },
   fullFeedback: { color: color.text, ...type.body },
   criterion: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderTopWidth: 1, borderTopColor: color.line },
-});
+}));

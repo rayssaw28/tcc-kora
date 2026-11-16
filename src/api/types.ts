@@ -52,11 +52,6 @@ export type Escolaridade =
   | 'DOUTORADO'
   | 'POS_DOUTORADO';
 
-export interface LoginRequest {
-  email: string;
-  senha: string;
-}
-
 export interface FuncionarioResumo {
   id: number;
   nome: string;
@@ -250,13 +245,6 @@ export interface AvaliacaoItemRequest {
   comentario: string | null;
 }
 
-export interface AvaliacaoRequest {
-  avaliadoId: number;
-  periodo: string;
-  comentarioGeral: string | null;
-  itens: AvaliacaoItemRequest[];
-}
-
 export interface BeneficioResponse {
   id: number;
   funcionarioId: number;
@@ -327,17 +315,6 @@ export interface FuncionarioFeedbackResumo {
   departamentoId: number | null;
   departamentoNome: string | null;
   cargoNome: string | null;
-}
-
-export interface FeedbackRequest {
-  destinatarioId: number;
-  periodo: string;
-  comentario: string;
-  criterios: {
-    criterio: string;
-    nota: number;
-    comentario: string | null;
-  }[];
 }
 
 export interface ConsentimentoResponse {

@@ -1,6 +1,5 @@
 import type { DocumentoResponse, TipoBeneficio, TipoDocumento } from '@/api/types';
 
-/** Nomes legíveis para os enums da API, usados em listas e notificações. */
 export const ROTULOS_BENEFICIO: Record<TipoBeneficio, string> = {
   VALE_REFEICAO: 'Vale-refeição',
   VALE_ALIMENTACAO: 'Vale-alimentação',

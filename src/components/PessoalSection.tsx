@@ -3,7 +3,6 @@ import {
   Modal,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -28,7 +27,7 @@ import {
 } from '@/api/types';
 import { ESTADOS_CIVIS, GENEROS, PAISES, UFS } from '@/constants/pessoal';
 import { ui } from '@/components/ui';
-import { color, type } from '@/constants/theme';
+import { color, estilos, type } from '@/constants/theme';
 
 type Opcao = readonly [string, string];
 
@@ -637,7 +636,7 @@ function montarMes(data: Date): (Date | null)[] {
   ];
 }
 
-const styles = StyleSheet.create({
+const styles = estilos(() => ({
   section: ui.section,
   header: ui.header,
   headerText: ui.headerText,
@@ -682,4 +681,4 @@ const styles = StyleSheet.create({
   dayDisabled: { color: color.lineStrong },
   yearList: { maxHeight: 350 },
   pressed: { opacity: 0.75 },
-});
+}));
